@@ -247,3 +247,15 @@ body {
 .gradient-border:hover::before {
   transform: scaleX(1);
 }
+
+@keyframes bounceFast {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.bounce-fast {
+  animation: bounceFast 0.3s ease-in-out infinite;
+}

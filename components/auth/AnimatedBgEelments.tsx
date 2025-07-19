@@ -27,10 +27,6 @@ const AnimatedBgEelments = () => {
     );
     return (
         <div className="absolute inset-0 overflow-hidden">
-            <FloatingOrb className="w-96 h-96 -top-20 -left-20" delay={0} />
-            <FloatingOrb className="w-80 h-80 top-1/2 -right-20" delay={2} />
-            <FloatingOrb className="w-64 h-64 bottom-20 left-1/4" delay={4} />
-
             {/* Geometric Patterns */}
             <div className="absolute top-0 left-0 w-full h-full">
                 <ParallaxShape intensity={10}>

@@ -14,7 +14,7 @@ import AddUserModal from "@/components/admin/userManagement/AddUserModal";
 import ConfirmationModal from "@/components/admin/userManagement/ComfirmationModal";
 
 type UserType = {
-  id: string;
+  _id: string;
   fullName: string;
   email: string;
   role: string;
@@ -30,14 +30,14 @@ type ConfirmActionType = {
 const UserManagement = () => {
   const [users, setUsers] = useState<UserType[]>([
     {
-      id: "1",
+      _id: "1",
       fullName: "Alice Johnson",
       email: "alice@example.com",
       role: "admin",
       status: "active",
     },
     {
-      id: "2",
+      _id: "2",
       fullName: "Bob Smith",
       email: "bob@example.com",
       role: "invigilator",
@@ -111,7 +111,7 @@ const UserManagement = () => {
     if (confirmAction) {
       setUsers(prevUsers =>
         prevUsers.map(user =>
-          user.id === confirmAction.userId
+          user._id === confirmAction.userId
             ? {
                 ...user,
                 status: confirmAction.currentStatus === "active" ? "inactive" : "active",

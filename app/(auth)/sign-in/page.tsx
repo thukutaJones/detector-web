@@ -21,6 +21,7 @@ const DetectorLogin: React.FC = () => {
   const [password, setPassword] = useState("");
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOTP] = useState<string[]>(["", "", "", "", "", ""]);
+  const [formError, setFormError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const otpRefs = useRef<any>([]);
@@ -80,14 +81,22 @@ const DetectorLogin: React.FC = () => {
             <div className="text-center animate-fade-in md:px-16">
               <div className="relative inline-block">
                 <div className="w-20 h-20 p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl transform hover:scale-105 transition-all duration-300">
-                  <Image src={'/logoWhite.png'} width={300} height={300} alt='logo' className='h-full w-full' />
-                  <div className="absolute -inset-2 bg-gradient-to-r from-green-500 to-yellow-500 rounded-3xl blur opacity-30 animate-pulse" />
+                  <Image
+                    src={"/logoWhite.png"}
+                    width={300}
+                    height={300}
+                    alt="logo"
+                    className="h-full w-full"
+                  />
+                  <div className="absolute -inset-2 rounded-3xl blur opacity-30 animate-pulse" />
                 </div>
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-green-600 bg-clip-text text-transparent mb-2">
                 Detector
               </h1>
-              <p className="text-gray-600 text-lg font-medium">Securing Academic Integrity</p>
+              <p className="text-gray-600 text-lg font-medium">
+                Securing Academic Integrity
+              </p>
               <div className="hidden md:flex max-w-md  flex-wrap justify-center gap-8 mt-8">
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <CheckCircle className="w-4 h-4 text-green-500" />
@@ -102,19 +111,30 @@ const DetectorLogin: React.FC = () => {
                   <span>Enhances academic integrity</span>
                 </div>
               </div>
-
             </div>
 
             {/* Login Form / Right Column */}
             <div className="bg-white/80 w-full max-w-md backdrop-blur-xl rounded-3xl shadow-2xl p-8 transform hover:scale-[1.02] transition-all duration-300">
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                {!!formError && (
+                  <div className="bg-red-900/10 p-4 rounded-xl">
+                    <p className="text-sm  text-red-600 font-bold">
+                      {formError}
+                    </p>
+                  </div>
+                )}
                 {/* Email Field */}
                 <div className="relative">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Email Address
+                  </label>
                   <div className="relative">
                     <Mail
-                      className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors ${focusedInput === "email" ? "text-green-500" : "text-gray-400"
-                        }`}
+                      className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors ${
+                        focusedInput === "email"
+                          ? "text-green-500"
+                          : "text-gray-400"
+                      }`}
                     />
                     <input
                       type="email"
@@ -131,11 +151,16 @@ const DetectorLogin: React.FC = () => {
 
                 {/* Password Field */}
                 <div className="relative">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Password
+                  </label>
                   <div className="relative">
                     <Lock
-                      className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors ${focusedInput === "password" ? "text-green-500" : "text-gray-400"
-                        }`}
+                      className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors ${
+                        focusedInput === "password"
+                          ? "text-green-500"
+                          : "text-gray-400"
+                      }`}
                     />
                     <input
                       type={showPassword ? "text" : "password"}
@@ -152,7 +177,11 @@ const DetectorLogin: React.FC = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-500 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -203,7 +232,9 @@ const DetectorLogin: React.FC = () => {
                 </div>
                 <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl blur opacity-30 animate-pulse" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Identity</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Verify Your Identity
+              </h2>
               <p className="text-gray-600 mb-8">
                 We’ve sent a 6-digit verification code to your email address.
               </p>

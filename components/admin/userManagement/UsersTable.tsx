@@ -51,11 +51,11 @@ const UsersTable = ({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user: any) => {
+              {filteredUsers.map((user: any, index: number) => {
                 const RoleIcon = getRoleIcon(user.role);
                 return (
                   <tr
-                    key={user.id}
+                    key={index?.toString()}
                     className="hover:bg-gray-50 transition-colors duration-150"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
