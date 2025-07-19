@@ -1,25 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Users,
-  UserCheck,
-  User,
-  Briefcase,
-} from "lucide-react";
+import { Users, UserCheck, User, Briefcase } from "lucide-react";
 import UserMngTopBar from "@/components/admin/userManagement/UserMngTopBar";
 import FilterAndSearch from "@/components/admin/userManagement/FilterAndSearch";
 import UsersTable from "@/components/admin/userManagement/UsersTable";
 import AddUserModal from "@/components/admin/userManagement/AddUserModal";
 import ConfirmationModal from "@/components/admin/userManagement/ComfirmationModal";
-
-type UserType = {
-  _id: string;
-  fullName: string;
-  email: string;
-  role: string;
-  status: "active" | "inactive";
-};
+import axios from "axios";
 
 type ConfirmActionType = {
   type: "activate" | "deactivate";
@@ -27,31 +15,24 @@ type ConfirmActionType = {
   currentStatus: "active" | "inactive";
 } | null;
 
-const UserManagement = () => {
-  const [users, setUsers] = useState<UserType[]>([
-    {
-      _id: "1",
-      fullName: "Alice Johnson",
-      email: "alice@example.com",
-      role: "admin",
-      status: "active",
-    },
-    {
-      _id: "2",
-      fullName: "Bob Smith",
-      email: "bob@example.com",
-      role: "invigilator",
-      status: "inactive",
-    },
-  ]);
+interface AlertProps {
+  message: string;
+  variant: "info" | "success" | "warning" | "error";
+  onClose?: () => void;
+}
 
-  const [filteredUsers, setFilteredUsers] = useState<UserType[]>(users);
+const UserManagement = () => {
+  const [users, setUsers] = useState<any[]>([]);
+
+  const [filteredUsers, setFilteredUsers] = useState<any[]>(users);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<ConfirmActionType>(null);
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const roles = [
     { value: "all", label: "All Roles", icon: Users },
@@ -77,13 +58,13 @@ const UserManagement = () => {
 
     let filtered = [...users];
     if (selectedRole !== "all") {
-      filtered = filtered.filter(user => user.role === selectedRole);
+      filtered = filtered.filter((user) => user.role === selectedRole);
     }
 
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        user =>
+        (user) =>
           user.fullName.toLowerCase().includes(term) ||
           user.email.toLowerCase().includes(term) ||
           user.role.toLowerCase().includes(term)
@@ -98,7 +79,10 @@ const UserManagement = () => {
     setShowRoleDropdown(false);
   };
 
-  const handleStatusToggle = (userId: string, currentStatus: "active" | "inactive") => {
+  const handleStatusToggle = (
+    userId: string,
+    currentStatus: "active" | "inactive"
+  ) => {
     setConfirmAction({
       type: currentStatus === "active" ? "deactivate" : "activate",
       userId,
@@ -109,12 +93,15 @@ const UserManagement = () => {
 
   const confirmStatusChange = () => {
     if (confirmAction) {
-      setUsers(prevUsers =>
-        prevUsers.map(user =>
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
           user._id === confirmAction.userId
             ? {
                 ...user,
-                status: confirmAction.currentStatus === "active" ? "inactive" : "active",
+                status:
+                  confirmAction.currentStatus === "active"
+                    ? "inactive"
+                    : "active",
               }
             : user
         )
@@ -122,6 +109,20 @@ const UserManagement = () => {
     }
     setShowConfirmModal(false);
     setConfirmAction(null);
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(``);
+    } catch (error: any) {
+      setAlertContent({
+        message:
+          error?.response?.data?.detail ||
+          "Something went wrong!! Please try again",
+        variant: "error",
+      });
+      console.log(error);
+    }
   };
 
   return (

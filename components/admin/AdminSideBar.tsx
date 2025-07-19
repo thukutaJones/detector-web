@@ -28,11 +28,19 @@ import {
   Building2,
   DoorOpen,
   HomeIcon,
+  CalendarClock,
+  Clock3,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-type MenuKey = "userManagement" | "analytics" | "systemData" | "academicData";
+type MenuKey =
+  | "dashboard"
+  | "userManagement"
+  | "scheduleManagement"
+  | "analytics"
+  | "systemData"
+  | "academicData";
 
 const AdminSideBar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false); // mobile
@@ -40,7 +48,9 @@ const AdminSideBar = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   const [expandedMenus, setExpandedMenus] = useState<Record<MenuKey, boolean>>({
-    userManagement: true,
+    dashboard: true,
+    userManagement: false,
+    scheduleManagement: false,
     analytics: false,
     systemData: false,
     academicData: false,
@@ -91,6 +101,29 @@ const AdminSideBar = () => {
           title: "Invigilators",
           icon: Eye,
           route: "/admin/user-management?role=invigilator",
+        },
+      ],
+    },
+    {
+      key: "scheduleManagement",
+      title: "Schedules",
+      icon: CalendarClock,
+      gradient: "from-yellow-500 to-orange-600",
+      children: [
+        {
+          title: "Active Schedules",
+          icon: Clock3,
+          route: "/admin/schedule-management/schedule?schedule=active",
+        },
+        {
+          title: "All Schedules",
+          icon: Clock3,
+          route: "/admin/schedule-management/schedule?schedule=active",
+        },
+        {
+          title: "Past Schedules",
+          icon: Clock3,
+          route: "/admin/schedule-management/schedule?schedule=active",
         },
       ],
     },
@@ -192,7 +225,7 @@ const AdminSideBar = () => {
               : "translate-x-0"
           }
           ${isExpanded ? "w-72" : "w-20"}
-          flex flex-col overflow-y-auto
+          flex flex-col overflow-y-auto overflow-x-clip
         `}
       >
         <div className="flex flex-col h-full relative">
@@ -250,7 +283,9 @@ const AdminSideBar = () => {
             {menuItems.map((item: any) => {
               const Icon = item.icon;
               const isMenuKey = [
+                "dashboard",
                 "userManagement",
+                "scheduleManagement",
                 "analytics",
                 "systemData",
                 "academicData",
@@ -286,7 +321,9 @@ const AdminSideBar = () => {
 
                   {isExpanded &&
                     ([
+                      "dashboard",
                       "userManagement",
+                      "scheduleManagement",
                       "analytics",
                       "systemData",
                       "academicData",

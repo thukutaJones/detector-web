@@ -14,20 +14,22 @@ import {
 } from "lucide-react";
 import AnimatedBgElements from "@/components/auth/AnimatedBgEelments";
 import Image from "next/image";
+import axios from "axios";
+import { baseUrl } from "@/constants/baseUrl";
 
 const DetectorLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showOTP, setShowOTP] = useState(false);
-  const [otp, setOTP] = useState<string[]>(["", "", "", "", "", ""]);
+  const [otp, setOTP] = useState<string[]>(Array(6).fill(""));
+  const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [formError, setFormError] = useState<string>("");
+  const [otpFormError, setOtpFormError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
-  const otpRefs = useRef<any>([]);
   const mousePositionRef = useRef({ x: 0, y: 0 });
 
-  // Mouse movement tracking for potential animations
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       mousePositionRef.current = {
@@ -40,34 +42,99 @@ const DetectorLogin: React.FC = () => {
   }, []);
 
   const handleLogin = async () => {
-    if (!email || !password) return;
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setShowOTP(true);
+    try {
+      if (!email || !password) {
+        setFormError("Please enter both email and pasword to continue!!");
+        return;
+      }
+      setIsLoading(true);
+      const res = await axios.post(`${baseUrl}/users/login`, {
+        username: email,
+        password,
+      });
+      sessionStorage.setItem("token", res.data?.token);
+      setShowOTP(true);
+    } catch (error: any) {
+      setFormError(
+        error?.response?.data?.detail ||
+          "Something went wrong please try again!!!"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOTPChange = (index: number, value: string) => {
-    if (value.length > 1) return;
+    const sanitized = value.replace(/\D/g, "");
+
+    if (sanitized.length === 0) return;
+
     const updatedOTP = [...otp];
-    updatedOTP[index] = value;
+    let currentIndex = index;
+
+    for (let i = 0; i < sanitized.length && currentIndex < 6; i++) {
+      updatedOTP[currentIndex] = sanitized[i];
+      currentIndex++;
+    }
+
     setOTP(updatedOTP);
-    if (value && index < 5) {
+
+    if (sanitized.length === 1 && index < 5) {
       otpRefs.current[index + 1]?.focus();
+    } else if (sanitized.length > 1) {
+      const nextEmpty = updatedOTP.findIndex((d, i) => d === "" && i > index);
+      if (nextEmpty !== -1) {
+        otpRefs.current[nextEmpty]?.focus();
+      }
     }
   };
 
-  const handleOTPKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
+  const handleOTPKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Backspace") {
+      if (otp[index] === "") {
+        otpRefs.current[index - 1]?.focus();
+      } else {
+        const updatedOTP = [...otp];
+        updatedOTP[index] = "";
+        setOTP(updatedOTP);
+      }
     }
   };
 
-  const handleVerifyOTP = async () => {
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    alert("Login successful! Redirecting to dashboard...");
+  const handleVerifyOTP = async (e: any) => {
+    e.preventDefault();
+    try {
+      if (otp?.length !== 6) {
+        setFormError("Please enter a full otp");
+        return;
+      }
+      setIsLoading(true);
+      const res = await axios.post(`${baseUrl}/users/verify-otp`, {
+        otp: otp.join(""),
+      });
+
+      sessionStorage.setItem("token", res.data?.token);
+      if (res.data?.user?.role === "admin") {
+        location.href = "/admin";
+        return;
+      }
+      if (res.data?.user?.role === "operator") {
+        location.href = "/operator";
+        return;
+      }
+
+      setOtpFormError("Your role is not allowed  here");
+    } catch (error: any) {
+      setOtpFormError(
+        error?.response?.data?.detail ||
+          "Something went wrong!! Please try again"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -115,7 +182,7 @@ const DetectorLogin: React.FC = () => {
 
             {/* Login Form / Right Column */}
             <div className="bg-white/80 w-full max-w-md backdrop-blur-xl rounded-3xl shadow-2xl p-8 transform hover:scale-[1.02] transition-all duration-300">
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-6" onSubmit={handleLogin}>
                 {!!formError && (
                   <div className="bg-red-900/10 p-4 rounded-xl">
                     <p className="text-sm  text-red-600 font-bold">
@@ -223,9 +290,18 @@ const DetectorLogin: React.FC = () => {
             </div>
           </div>
         ) : (
-          // OTP Verification Modal
           <div className="w-full max-w-md animate-fade-in">
-            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 text-center">
+            <form
+              onSubmit={handleVerifyOTP}
+              className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 text-center"
+            >
+              {!!otpFormError && (
+                <div className="bg-red-900/10 p-4 rounded-xl mb-4">
+                  <p className="text-sm  text-red-600 font-bold">
+                    {otpFormError}
+                  </p>
+                </div>
+              )}
               <div className="relative inline-block mb-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-3xl flex items-center justify-center shadow-2xl">
                   <Smartphone className="w-10 h-10 text-white" />
@@ -253,7 +329,7 @@ const DetectorLogin: React.FC = () => {
                 ))}
               </div>
               <button
-                onClick={handleVerifyOTP}
+                type="submit"
                 disabled={isLoading || otp.some((digit) => !digit)}
                 className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
               >
@@ -271,11 +347,14 @@ const DetectorLogin: React.FC = () => {
               </button>
               <p className="text-sm text-gray-600">
                 Didn’t receive the code?{" "}
-                <button className="text-yellow-600 hover:text-yellow-700 font-semibold transition-colors">
+                <button
+                  className="text-yellow-600 hover:text-yellow-700 font-semibold transition-colors"
+                  type="button"
+                >
                   Resend
                 </button>
               </p>
-            </div>
+            </form>
           </div>
         )}
       </div>

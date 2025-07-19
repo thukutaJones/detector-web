@@ -14,8 +14,13 @@ import {
 } from "lucide-react";
 import AnimatedBgElements from "@/components/auth/AnimatedBgEelments";
 import Image from "next/image";
+import { useParams } from "next/navigation";
+import axios from "axios";
+import { baseUrl } from "@/constants/baseUrl";
 
 const DetectorLogin: React.FC = () => {
+  const parms = useParams();
+  const token = parms?.token;
   const [showPassword, setShowPassword] = useState<{
     setPassword: boolean;
     comfirmPassword: boolean;
@@ -32,6 +37,7 @@ const DetectorLogin: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string>("");
   const otpRefs = useRef<any>([]);
   const mousePositionRef = useRef({ x: 0, y: 0 });
 
@@ -46,8 +52,42 @@ const DetectorLogin: React.FC = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  const handleLogin = async () => {
+  const handleSetPassword = async () => {
     if (!password) return;
+    if (password?.setPassword?.length < 8) {
+      setFormError("Password can not be less than 8 characters");
+      return;
+    }
+    if (password?.comfirmPassword !== password?.setPassword) {
+      setFormError("Passwords does not match");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await axios.post(`${baseUrl}/users/new-password`, {
+        token,
+        password: password?.comfirmPassword,
+      });
+
+      sessionStorage.setItem("token", res.data?.token);
+      if (res.data?.user?.role === "admin") {
+        location.href = "/admin";
+        return;
+      }
+      if (res.data?.user?.role === "operator") {
+        location.href = "/operator";
+        return;
+      }
+
+      setFormError("Your role is not allowed  here");
+    } catch (error: any) {
+      setFormError(
+        error?.response?.data?.detail ||
+          "Something went wrong!! Please try again..."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -93,6 +133,11 @@ const DetectorLogin: React.FC = () => {
 
           <div className="bg-white/80 w-full max-w-md backdrop-blur-xl rounded-3xl shadow-2xl p-8 transform hover:scale-[1.02] transition-all duration-300">
             <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+              {!!formError && (
+                <div className="bg-red-900/10 p-4 rounded-xl">
+                  <p className="text-sm  text-red-600 font-bold">{formError}</p>
+                </div>
+              )}
               <div className="relative">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Set Password
@@ -136,7 +181,7 @@ const DetectorLogin: React.FC = () => {
                 </div>
               </div>
 
-             <div className="relative">
+              <div className="relative">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Comfirm Password
                 </label>
@@ -152,7 +197,10 @@ const DetectorLogin: React.FC = () => {
                     type={showPassword?.comfirmPassword ? "text" : "password"}
                     value={password?.comfirmPassword}
                     onChange={(e) =>
-                      setPassword({ ...password, comfirmPassword: e.target.value })
+                      setPassword({
+                        ...password,
+                        comfirmPassword: e.target.value,
+                      })
                     }
                     onFocus={() => setFocusedInput("comfirmPassword")}
                     onBlur={() => setFocusedInput(null)}
@@ -180,7 +228,7 @@ const DetectorLogin: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={handleLogin}
+                onClick={handleSetPassword}
                 disabled={isLoading}
                 className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >

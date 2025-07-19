@@ -11,6 +11,7 @@ import { baseUrl } from "@/constants/baseUrl";
 import { Alert } from "@/components/Alert";
 import ComfirmationModal from "@/components/ComfirmationModal";
 import EditTermModal from "@/components/academicData/EditTerm";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AlertProps {
   message: string;
@@ -19,6 +20,7 @@ interface AlertProps {
 }
 
 const CoursesManagement = () => {
+  const user = useAuth(["admin"]);
   const [courses, setCourses] = useState<any[]>([]);
 
   const [filteredCourses, setFilteredCourses] = useState<any[]>(courses);
@@ -38,11 +40,12 @@ const CoursesManagement = () => {
   }, [searchTerm, courses]);
 
   const fetchCourses = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
       const res = await axios.get(`${baseUrl}/courses`, {
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImZ1bGxOYW1lIjoiSmFuZSBEb2UiLCJwaG9uZSI6IjU1NS0xMjM0IiwiZ2VuZGVyIjoiZmVtYWxlIiwicm9sZSI6ImFkbWluIiwibGFzdExvZ2luIjoiMjAyNS0wNy0xOSAxMDozOTowOS44NTQ4NzkiLCJlbWFpbCI6ImphbmUuZG9lQGV4YW1wbGUuY29tIiwidmVyaWZpZWRFbWFpbCI6dHJ1ZSwicGFzc3dvcmQiOiIiLCJjcmVhdGVkIjoiMjAyNS0wNy0xOSAxMDozNTo1Ni4wOTY4NjgiLCJ1cGRhdGVkIjoiMjAyNS0wNy0xOSAxMDozNTo1Ni4wOTY4OTIiLCJpZCI6IjY4N2I1OGVjZWZlYTYxNWZlNGE0ZjdlMyJ9LCJleHAiOjE3ODE5NDQ5NDZ9.ZJ5uVzB3wZ8Gt_Owx_yaIPX50yP-N0C14awJldGH3Zs`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
       setCourses(res.data?.courses);
@@ -68,7 +71,7 @@ const CoursesManagement = () => {
     try {
       await axios.delete(`${baseUrl}/courses/${id}`, {
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImZ1bGxOYW1lIjoiSmFuZSBEb2UiLCJwaG9uZSI6IjU1NS0xMjM0IiwiZ2VuZGVyIjoiZmVtYWxlIiwicm9sZSI6ImFkbWluIiwibGFzdExvZ2luIjoiMjAyNS0wNy0xOSAxMDozOTowOS44NTQ4NzkiLCJlbWFpbCI6ImphbmUuZG9lQGV4YW1wbGUuY29tIiwidmVyaWZpZWRFbWFpbCI6dHJ1ZSwicGFzc3dvcmQiOiIiLCJjcmVhdGVkIjoiMjAyNS0wNy0xOSAxMDozNTo1Ni4wOTY4NjgiLCJ1cGRhdGVkIjoiMjAyNS0wNy0xOSAxMDozNTo1Ni4wOTY4OTIiLCJpZCI6IjY4N2I1OGVjZWZlYTYxNWZlNGE0ZjdlMyJ9LCJleHAiOjE3ODE5NDQ5NDZ9.ZJ5uVzB3wZ8Gt_Owx_yaIPX50yP-N0C14awJldGH3Zs`,
+          Authorization: `Bearer ${user?.token}`,
         },
       });
       setAlertContent({
@@ -91,9 +94,9 @@ const CoursesManagement = () => {
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+  }, [user]);
 
-  if (isLoading)
+  if (!user || isLoading)
     return (
       <ManagementLoading
         message="Loading courses"
