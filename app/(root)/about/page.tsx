@@ -54,7 +54,7 @@ const AboutPage = () => {
           {/* Main Content Grid */}
           <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
             {/* Left Column - Text Content */}
-            <div className="opacity-0 animate-slide-in-left delay-200">
+            <div className="opacity- animate-slide-in-left delay-200">
               <h2 className="text-4xl font-bold text-slate-800 mb-6">
                 Pioneering Academic Integrity
               </h2>
@@ -77,7 +77,7 @@ const AboutPage = () => {
             </div>
 
             {/* Right Column - Visual Element */}
-            <div className="opacity-0 animate-slide-in-right delay-400">
+            <div className="opacity- animate-slide-in-right delay-400">
               <div className="bg-gradient-to-br from-green-50 to-yellow-50 rounded-3xl p-12 text-center border border-green-100">
                 <div className="w-32 h-32 bg-white rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
                   <Eye className="w-16 h-16 text-green-600" />

@@ -8,6 +8,10 @@ import UsersTable from "@/components/admin/userManagement/UsersTable";
 import AddUserModal from "@/components/admin/userManagement/AddUserModal";
 import ConfirmationModal from "@/components/admin/userManagement/ComfirmationModal";
 import axios from "axios";
+import { baseUrl } from "@/constants/baseUrl";
+import { useAuth } from "@/hooks/useAuth";
+import { Alert } from "@/components/Alert";
+import ManagementLoading from "@/components/academicData/ManagementLoading";
 
 type ConfirmActionType = {
   type: "activate" | "deactivate";
@@ -22,6 +26,7 @@ interface AlertProps {
 }
 
 const UserManagement = () => {
+  const user = useAuth(["admin"]);
   const [users, setUsers] = useState<any[]>([]);
 
   const [filteredUsers, setFilteredUsers] = useState<any[]>(users);
@@ -40,6 +45,33 @@ const UserManagement = () => {
     { value: "operator", label: "Operator", icon: User },
     { value: "invigilator", label: "Invigilator", icon: Briefcase },
   ];
+
+  const fetchUsers = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      const res = await axios.get(`${baseUrl}/users`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
+      setUsers(res.data?.users);
+    } catch (error: any) {
+      setAlertContent({
+        message:
+          error?.response?.data?.detail ||
+          "Something went wrong!! Please try again",
+        variant: "error",
+      });
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [user]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -111,48 +143,49 @@ const UserManagement = () => {
     setConfirmAction(null);
   };
 
-  const fetchUsers = async () => {
-    try {
-      const res = await axios.get(``);
-    } catch (error: any) {
-      setAlertContent({
-        message:
-          error?.response?.data?.detail ||
-          "Something went wrong!! Please try again",
-        variant: "error",
-      });
-      console.log(error);
-    }
-  };
+  if (!user || isLoading) return <ManagementLoading context="users" />;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden min-h-screen bg-gray-50">
-      <UserMngTopBar setShowAddModal={setShowAddModal} />
-
-      <FilterAndSearch
-        setShowRoleDropdown={setShowRoleDropdown}
-        selectedRole={selectedRole}
-        showRoleDropdown={showRoleDropdown}
-        roles={roles}
-        handleRoleChange={handleRoleChange}
-        setSearchTerm={setSearchTerm}
-        filteredUsers={filteredUsers}
-        searchTerm={searchTerm}
-      />
+      <div className="w-full h-[190px]">
+        <UserMngTopBar setShowAddModal={setShowAddModal} />
+        <FilterAndSearch
+          setShowRoleDropdown={setShowRoleDropdown}
+          selectedRole={selectedRole}
+          showRoleDropdown={showRoleDropdown}
+          roles={roles}
+          handleRoleChange={handleRoleChange}
+          setSearchTerm={setSearchTerm}
+          filteredUsers={filteredUsers}
+          searchTerm={searchTerm}
+        />
+      </div>
 
       <UsersTable
         filteredUsers={filteredUsers}
         roles={roles}
-        handleStatusToggle={handleStatusToggle}
       />
 
-      {showAddModal && <AddUserModal setShowAddModal={setShowAddModal} />}
+      {showAddModal && (
+        <AddUserModal
+          setShowAddModal={setShowAddModal}
+          callBack={fetchUsers}
+          handleAlert={(alert: AlertProps) => setAlertContent(alert)}
+        />
+      )}
 
       {showConfirmModal && (
         <ConfirmationModal
           confirmAction={confirmAction}
           setShowConfirmModal={setShowConfirmModal}
           confirmStatusChange={confirmStatusChange}
+        />
+      )}
+
+      {alertContent && (
+        <Alert
+          variant={alertContent?.variant}
+          message={alertContent?.message}
         />
       )}
     </div>

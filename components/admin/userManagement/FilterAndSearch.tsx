@@ -36,7 +36,7 @@ const FilterAndSearch = ({
           </button>
 
           {showRoleDropdown && (
-            <div className="absolute z-10 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+            <div className="absolute z-30 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
               {roles.map((role: any) => {
                 const Icon = role.icon;
                 return (

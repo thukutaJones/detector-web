@@ -6,40 +6,49 @@ import { Github, Linkedin, Twitter } from 'lucide-react';
 const TeamPage = () => {
   const teamMembers = [
     {
-      name: "Sarah Johnson",
-      role: "Chief Technology Officer",
-      department: "Engineering",
-      bio: "Sarah leads our technology vision with over 15 years of experience in software architecture and team leadership. She specializes in scalable systems and has a passion for mentoring emerging developers.",
-      github: "https://github.com/sarahjohnson",
-      linkedin: "https://linkedin.com/in/sarahjohnson",
-      twitter: "https://twitter.com/sarahjohnson"
+      name: "Ms. Precious Msonda",
+      role: "Lecturer",
+      department: "Project Supervisor",
+      bio:"",
+      github: "#",
+      linkedin: "#",
+      twitter: "#"
     },
     {
-      name: "Michael Chen",
-      role: "Lead Product Designer",
-      department: "Design",
-      bio: "Michael brings creative excellence to our product experience. With a background in both visual design and user research, he ensures our products are both beautiful and intuitive.",
-      github: "https://github.com/michaelchen",
-      linkedin: "https://linkedin.com/in/michaelchen",
-      twitter: "https://twitter.com/michaelchen"
+      name: "Mr. Wongan Mkandawire",
+      role: "Lecturer & Software Engineer",
+      department: "ICT Supervisor",
+      bio: "",
+      github: "#",
+      linkedin: "https://www.linkedin.com/in/wongan-mkandawire-852111a",
+      twitter: "#"
     },
     {
-      name: "Emily Rodriguez",
-      role: "Senior Full Stack Developer",
-      department: "Engineering",
-      bio: "Emily is our go-to expert for complex technical challenges. She excels at building robust, scalable applications and has a keen eye for performance optimization and code quality.",
-      github: "https://github.com/emilyrodriguez",
-      linkedin: "https://linkedin.com/in/emilyrodriguez",
-      twitter: "https://twitter.com/emilyrodriguez"
+      name: "Bright Paipila",
+      role: "Student",
+      department: "Project Group Leader",
+      bio: "",
+      github: "#",
+      linkedin: "#",
+      twitter: "#"
     },
     {
-      name: "David Kim",
-      role: "Data Science Lead",
-      department: "Analytics",
-      bio: "David transforms complex data into actionable insights. With expertise in machine learning and statistical analysis, he drives our data-driven decision making processes.",
-      github: "https://github.com/davidkim",
-      linkedin: "https://linkedin.com/in/davidkim",
-      twitter: "https://twitter.com/davidkim"
+      name: "Sebastian Macheso",
+      role: "Student",
+      department: "Backend Developer",
+      bio: "",
+      github: "#",
+      linkedin: "#",
+      twitter: "#"
+    },
+    {
+      name: "Jones Thukuta",
+      role: "Student",
+      department: "Frontend Developer",
+      bio: "",
+      github: "#",
+      linkedin: "#",
+      twitter: "#"
     }
   ];
 

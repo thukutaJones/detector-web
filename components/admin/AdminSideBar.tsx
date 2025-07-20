@@ -33,6 +33,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import axios from "axios";
+import { baseUrl } from "@/constants/baseUrl";
 
 type MenuKey =
   | "dashboard"
@@ -43,12 +46,14 @@ type MenuKey =
   | "academicData";
 
 const AdminSideBar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop
+  const user = useAuth(["admin"]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [userData, setUserData] = useState<any>({});
 
   const [expandedMenus, setExpandedMenus] = useState<Record<MenuKey, boolean>>({
-    dashboard: true,
+    dashboard: false,
     userManagement: false,
     scheduleManagement: false,
     analytics: false,
@@ -86,21 +91,21 @@ const AdminSideBar = () => {
       icon: Users,
       gradient: "from-blue-500 to-purple-600",
       children: [
-        { title: "All", icon: Users, route: "/admin/user-management" },
+        { title: "All", icon: Users, route: "/user-management" },
         {
           title: "Admins",
           icon: Shield,
-          route: "/admin/user-management?role=admin",
+          route: "/user-management?role=admin",
         },
         {
           title: "Operators",
           icon: User,
-          route: "/admin/user-management?role=operator",
+          route: "/user-management?role=operator",
         },
         {
           title: "Invigilators",
           icon: Eye,
-          route: "/admin/user-management?role=invigilator",
+          route: "/user-management?role=invigilator",
         },
       ],
     },
@@ -111,19 +116,14 @@ const AdminSideBar = () => {
       gradient: "from-yellow-500 to-orange-600",
       children: [
         {
-          title: "Active Schedules",
+          title: "Schedules",
           icon: Clock3,
-          route: "/admin/schedule-management/schedule?schedule=active",
-        },
-        {
-          title: "All Schedules",
-          icon: Clock3,
-          route: "/admin/schedule-management/schedule?schedule=active",
+          route: "/schedules",
         },
         {
           title: "Past Schedules",
           icon: Clock3,
-          route: "/admin/schedule-management/schedule?schedule=active",
+          route: "/past-schedules",
         },
       ],
     },
@@ -136,17 +136,17 @@ const AdminSideBar = () => {
         {
           title: "User Analytics",
           icon: TrendingUp,
-          route: "/admin/analytics#user-analytics",
+          route: "/analytics#user-analytics",
         },
         {
           title: "Detection Performance",
           icon: Activity,
-          route: "/admin/analytics#detection-performance",
+          route: "/analytics#detection-performance",
         },
         {
           title: "Exam Analytics",
           icon: FileText,
-          route: "/admin/analytics#exam-analytics",
+          route: "/analytics#exam-analytics",
         },
       ],
     },
@@ -159,10 +159,10 @@ const AdminSideBar = () => {
         {
           title: "Positions",
           icon: Briefcase,
-          route: "/admin/academic-data/positions",
+          route: "/academic-data/positions",
         },
-        { title: "Courses", icon: Book, route: "/admin/academic-data/courses" },
-        { title: "Rooms", icon: DoorOpen, route: "/admin/academic-data/rooms" },
+        { title: "Courses", icon: Book, route: "/academic-data/courses" },
+        { title: "Rooms", icon: DoorOpen, route: "/academic-data/rooms" },
       ],
     },
     {
@@ -174,28 +174,47 @@ const AdminSideBar = () => {
         {
           title: "Homepage Data",
           icon: Home,
-          route: "/admin/system-data/home-page",
+          route: "/system-data/home-page",
         },
         {
           title: "Our Team Data",
           icon: UserCheck,
-          route: "/admin/system-data/our-team",
+          route: "/system-data/our-team",
         },
         {
           title: "About Us Data",
           icon: Info,
-          route: "/admin/system-data/about-us",
+          route: "/system-data/about-us",
         },
         {
           title: "Contact Us Data",
           icon: Mail,
-          route: "/admin/system-data/contact-us-data",
+          route: "/system-data/contact-us-data",
         },
       ],
     },
   ] as const;
 
   const isExpanded = isMobile ? true : !sidebarCollapsed;
+
+  const fetchUser = async () => {
+    if (!user) return;
+    try {
+      const res = await axios.get(`${baseUrl}/users/${user?.user?.id}`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
+      setUserData(res?.data);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, [user]);
 
   return (
     <>
@@ -279,7 +298,7 @@ const AdminSideBar = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto scroll-container">
             {menuItems.map((item: any) => {
               const Icon = item.icon;
               const isMenuKey = [
@@ -387,9 +406,11 @@ const AdminSideBar = () => {
               {isExpanded && (
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-gray-900">
-                    John Doe
+                    {userData?.fullName}
                   </p>
-                  <p className="text-xs text-gray-500">System Administrator</p>
+                  <p className="text-xs text-gray-500">
+                    {userData?.role?.toUpperCase()}
+                  </p>
                 </div>
               )}
             </button>

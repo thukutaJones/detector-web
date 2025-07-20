@@ -14,7 +14,7 @@ const HeroSection = () => {
                             </div>
 
                             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                                Safeguard <span className="text-green-600">Academic</span> Integrity
+                                Safeguarding <span className="text-green-600">Academic</span> Integrity
                             </h1>
 
                             <p className="text-xl text-gray-600 leading-relaxed">

@@ -1,3 +1,7 @@
+import FastBouncingDots from "@/components/BouncingAnimation";
+import { baseUrl } from "@/constants/baseUrl";
+import { useAuth } from "@/hooks/useAuth";
+import axios from "axios";
 import {
   Briefcase,
   ChevronDown,
@@ -10,7 +14,22 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 
-const AddUserModal = ({ setShowAddModal }: { setShowAddModal: any }) => {
+interface AlertProps {
+  message: string;
+  variant: "info" | "success" | "warning" | "error";
+  onClose?: () => void;
+}
+
+const AddUserModal = ({
+  setShowAddModal,
+  handleAlert,
+  callBack,
+}: {
+  setShowAddModal: any;
+  handleAlert: (alert: AlertProps) => void;
+  callBack: any;
+}) => {
+  const user = useAuth(["admin"]);
   const [newUser, setNewUser] = useState({
     fullName: "",
     email: "",
@@ -22,6 +41,7 @@ const AddUserModal = ({ setShowAddModal }: { setShowAddModal: any }) => {
 
   const [showAddRoleDropdown, setShowAddRoleDropdown] = useState(false);
   const [showAddPositionDropdown, setShowAddPositionDropdown] = useState(false);
+  const [isAddingUser, setIsAddingUser] = useState<boolean>(false);
 
   const roles = [
     { value: "all", label: "All Roles", icon: Users },
@@ -35,13 +55,42 @@ const AddUserModal = ({ setShowAddModal }: { setShowAddModal: any }) => {
     "Operations Manager",
     "Senior Invigilator",
     "HR Administrator",
-    "Quality Assurance",
+    "Lecturer",
     "IT Support",
     "Data Analyst",
   ];
 
-  const handleAddUser = () => {
-    setShowAddModal(false);
+  const handleAddUser = async (e: any) => {
+    e.preventDefault();
+    setIsAddingUser(true);
+    try {
+      const payload = {
+        fullName: newUser?.fullName,
+        phone: newUser?.phone,
+        gender: newUser?.sex,
+        role: newUser?.role,
+        email: newUser?.email,
+        verifiedEmail: false,
+      };
+
+      await axios.post(`${baseUrl}/users`, payload, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
+
+      await callBack();
+      setShowAddModal(false);
+    } catch (error: any) {
+      handleAlert({
+        variant: "error",
+        message:
+          error?.response?.data?.message ||
+          "Something went wrong!! Please try again",
+      });
+    } finally {
+      setShowAddModal(false);
+    }
   };
 
   return (
@@ -156,7 +205,7 @@ const AddUserModal = ({ setShowAddModal }: { setShowAddModal: any }) => {
             </div>
 
             {/* Position Dropdown */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 <Briefcase className="w-4 h-4 inline mr-2" />
                 Position
@@ -194,7 +243,7 @@ const AddUserModal = ({ setShowAddModal }: { setShowAddModal: any }) => {
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* Sex */}
             <div>
@@ -241,10 +290,16 @@ const AddUserModal = ({ setShowAddModal }: { setShowAddModal: any }) => {
             </button>
             <button
               onClick={handleAddUser}
-              disabled={!newUser.fullName || !newUser.email || !newUser.role}
+              disabled={
+                !newUser.fullName ||
+                !newUser.email ||
+                !newUser.role ||
+                isAddingUser
+              }
+              type="submit"
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
             >
-              Add User
+              {isAddingUser ? <FastBouncingDots /> : <p> Add User</p>}
             </button>
           </div>
         </div>
