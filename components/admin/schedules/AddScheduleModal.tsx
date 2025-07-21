@@ -30,6 +30,7 @@ const AddScheduleModal = ({
   const [isAddingSchedule, setIsAddingSchedule] = useState<boolean>(false);
 
   const fetchOperators = async () => {
+    if(!user) return;
     setisfetchingOperators(true);
     try {
       const res = await axios.get(`${baseUrl}/users/role/operator`, {
@@ -52,7 +53,7 @@ const AddScheduleModal = ({
 
   useEffect(() => {
     fetchOperators();
-  }, []);
+  }, [user]);
 
   const getMinDate = () => {
     const today = new Date();

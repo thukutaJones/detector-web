@@ -53,10 +53,10 @@
           username: email,
           password,
         });
-        // sessionStorage.setItem("token", res.data?.token);
+        // localStorage.setItem("token", res.data?.token);
         // setShowOTP(true);
 
-        sessionStorage.setItem("token", res.data?.token);
+        localStorage.setItem("token", res.data?.token);
         if (res.data?.user?.role === "admin") {
           location.href = "/admin";
           return;
@@ -129,7 +129,7 @@
           otp: otp.join(""),
         });
 
-        sessionStorage.setItem("token", res.data?.token);
+        localStorage.setItem("token", res.data?.token);
         if (res.data?.user?.role === "admin") {
           location.href = "/admin";
           return;

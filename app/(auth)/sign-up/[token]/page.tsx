@@ -69,7 +69,9 @@ const DetectorLogin: React.FC = () => {
         password: password?.comfirmPassword,
       });
 
-      sessionStorage.setItem("token", res.data?.token);
+      console.log(res?.data)
+
+      localStorage.setItem("token", res.data?.token);
       if (res.data?.user?.role === "admin") {
         location.href = "/admin";
         return;

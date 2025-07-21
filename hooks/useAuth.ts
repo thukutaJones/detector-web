@@ -22,7 +22,7 @@ export const useAuth = (
   useEffect(() => {
     if (typeof window === "undefined") router.push(redirectPath);
 
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       router.push(redirectPath);
