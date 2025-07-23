@@ -27,7 +27,7 @@ const TermsTable: React.FC<TermsTableProps> = ({
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  ID
+                  No
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Date Added
@@ -47,7 +47,7 @@ const TermsTable: React.FC<TermsTableProps> = ({
                   className="hover:bg-gray-50 transition-colors"
                 >
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {term?.id || term?._id}
+                    {index + 1}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {new Date(term?.created).toLocaleDateString()}

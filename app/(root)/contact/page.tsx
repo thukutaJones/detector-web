@@ -39,7 +39,7 @@ const ContactUsPage = () => {
     {
       icon: Mail,
       title: "Email Us",
-      primary: "hello@company.com",
+      primary: "examcheatingdetection.team@gmail.com",
       secondary: "We'll respond within 24 hours",
       description: "Get in touch for general inquiries or support",
       color: "blue"
@@ -47,7 +47,7 @@ const ContactUsPage = () => {
     {
       icon: Phone,
       title: "Call Us",
-      primary: "+1 (555) 123-4567",
+      primary: "+265 ",
       secondary: "Mon-Fri, 9AM-6PM EST",
       description: "Speak directly with our team",
       color: "green"
@@ -55,9 +55,9 @@ const ContactUsPage = () => {
     {
       icon: MapPin,
       title: "Visit Us",
-      primary: "123 Business Avenue",
-      secondary: "New York, NY 10001",
-      description: "Our headquarters in Manhattan",
+      primary: "Mzuzu University, Mzuzu, Luwinga",
+      secondary: "Mzuzu",
+      description: "Our headquarters at Mzuzu University",
       color: "purple"
     },
     {
@@ -72,22 +72,10 @@ const ContactUsPage = () => {
 
   const officeLocations = [
     {
-      city: "New York",
-      address: "123 Business Avenue, NY 10001",
-      phone: "+1 (555) 123-4567",
+      city: "Mzuzu",
+      address: "Mzuzu University, Mzuzu, Luwinga",
+      phone: "+265 ",
       isHQ: true
-    },
-    {
-      city: "San Francisco",
-      address: "456 Tech Street, CA 94105",
-      phone: "+1 (555) 234-5678",
-      isHQ: false
-    },
-    {
-      city: "London",
-      address: "789 Innovation Lane, EC2A 4BX",
-      phone: "+44 20 7123 4567",
-      isHQ: false
     }
   ];
 
@@ -198,7 +186,7 @@ const ContactUsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="name" className="block text-sm font-semibold text-gray-700">
-                      Full Name *
+                      Full Name
                     </label>
                     <input
                       type="text"
@@ -219,7 +207,7 @@ const ContactUsPage = () => {
 
                   <div className="space-y-2">
                     <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
-                      Email Address *
+                      Email Address
                     </label>
                     <input
                       type="email"
@@ -242,7 +230,7 @@ const ContactUsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="company" className="block text-sm font-semibold text-gray-700">
-                      Company
+                      Company (optional)
                     </label>
                     <input
                       type="text"
@@ -262,7 +250,7 @@ const ContactUsPage = () => {
 
                   <div className="space-y-2">
                     <label htmlFor="subject" className="block text-sm font-semibold text-gray-700">
-                      Subject *
+                      Subject
                     </label>
                     <input
                       type="text"
@@ -284,7 +272,7 @@ const ContactUsPage = () => {
 
                 <div className="space-y-2">
                   <label htmlFor="message" className="block text-sm font-semibold text-gray-700">
-                    Message *
+                    Message
                   </label>
                   <textarea
                     id="message"
@@ -304,10 +292,6 @@ const ContactUsPage = () => {
                 </div>
 
                 <div className="flex items-center justify-between pt-4">
-                  <p className="text-sm text-gray-500">
-                    * Required fields
-                  </p>
-
                   <button
                     type="submit"
                     disabled={isSubmitting}

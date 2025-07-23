@@ -7,7 +7,7 @@ const TeamPage = () => {
   const teamMembers = [
     {
       name: "Ms. Precious Msonda",
-      role: "Lecturer",
+      role: "Lecturer & Data Scientist",
       department: "Project Supervisor",
       bio:"",
       github: "#",

@@ -2,6 +2,7 @@ import FastBouncingDots from "@/components/BouncingAnimation";
 import { baseUrl } from "@/constants/baseUrl";
 import { useAuth } from "@/hooks/useAuth";
 import axios from "axios";
+import { form } from "framer-motion/client";
 import { User, X, Loader2, AlertTriangle } from "lucide-react";
 
 import React, { useEffect, useState } from "react";
@@ -15,11 +16,9 @@ interface AlertProps {
 const AddScheduleModal = ({
   setShowScheduleModal,
   callBack,
-  handleAlert,
 }: {
   setShowScheduleModal: any;
   callBack: any;
-  handleAlert: (alert: AlertProps) => void;
 }) => {
   const user = useAuth(["admin"]);
   const [operators, setOperators] = useState<any[]>([]);
@@ -28,9 +27,9 @@ const AddScheduleModal = ({
   const [isFetchingOperators, setisfetchingOperators] =
     useState<boolean>(false);
   const [isAddingSchedule, setIsAddingSchedule] = useState<boolean>(false);
-
+  const [formError, setFormError] = useState<string>("");
   const fetchOperators = async () => {
-    if(!user) return;
+    if (!user) return;
     setisfetchingOperators(true);
     try {
       const res = await axios.get(`${baseUrl}/users/role/operator`, {
@@ -40,12 +39,10 @@ const AddScheduleModal = ({
       });
       setOperators(res.data?.users);
     } catch (error: any) {
-      handleAlert({
-        message:
-          error?.response?.data?.detail ||
-          "Something went wrong!! Please try again",
-        variant: "error",
-      });
+      setFormError(
+        error?.response?.data?.detail ||
+          "Something went wrong!! Please try again"
+      );
     } finally {
       setisfetchingOperators(false);
     }
@@ -79,12 +76,10 @@ const AddScheduleModal = ({
       await callBack();
       setShowScheduleModal(false);
     } catch (error: any) {
-      handleAlert({
-        message:
-          error?.response?.data?.detail ||
-          "Something went wrong!! Please try again",
-        variant: "error",
-      });
+      setFormError(
+        error?.response?.data?.detail ||
+          "Something went wrong!! Please try again"
+      );
     } finally {
       setIsAddingSchedule(false);
     }
@@ -114,6 +109,11 @@ const AddScheduleModal = ({
         {/* Body */}
         <div className="p-6 overflow-y-auto space-y-8">
           {/* Examination Date */}
+          {formError && (
+            <div className="bg-red-100 text-sm text-red-800 p-4 rounded-lg mb-4">
+              {formError}
+            </div>
+          )}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Examination Date

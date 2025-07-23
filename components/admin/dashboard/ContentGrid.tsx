@@ -85,10 +85,10 @@ const ContentGrid = ({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
-                Live Activity Feed
+                System activities
               </h2>
               <p className="text-sm text-gray-500">
-                Real-time detection events
+                System log events
               </p>
             </div>
           </div>
@@ -153,8 +153,8 @@ const ContentGrid = ({
             <Brain className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">System Metrics</h2>
-            <p className="text-sm text-gray-500">Live performance data</p>
+            <h2 className="text-xl font-bold text-gray-900">System Log</h2>
+            <p className="text-sm text-gray-500">System performance data</p>
           </div>
         </div>
       </div>

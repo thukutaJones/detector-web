@@ -16,8 +16,8 @@ const MngTopBar = ({
     <div className="bg-white border-b border-gray-200 px-8 py-6 h-[100px]">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-          <p className="mt-2 text-gray-600">{message}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+          <p className="mt-2 text-gray-600 text-sm">{message}</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}

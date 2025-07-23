@@ -124,9 +124,9 @@ const UsersTable: React.FC<UsersTableProps> = ({
                     {/* Last Login */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.lastLogin ? (
-                        <p>{user.lastLogin}</p>
+                        <p>{new Date(user.lastLogin).toLocaleDateString()}</p>
                       ) : (
-                        <p className="text-3xl text-red-600">--</p>
+                        <p className="text-3xl text-gray-600">--</p>
                       )}
                     </td>
 

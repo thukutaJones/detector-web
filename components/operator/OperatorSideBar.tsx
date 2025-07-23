@@ -39,14 +39,9 @@ import { baseUrl } from "@/constants/baseUrl";
 
 type MenuKey =
   | "dashboard"
-  | "userManagement"
-  | "scheduleManagement"
-  | "analytics"
-  | "systemData"
-  | "academicData";
 
-const AdminSideBar = () => {
-  const user = useAuth(["admin"]);
+const OperatorSideBar = () => {
+  const user = useAuth(["operator"]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -54,11 +49,6 @@ const AdminSideBar = () => {
 
   const [expandedMenus, setExpandedMenus] = useState<Record<MenuKey, boolean>>({
     dashboard: false,
-    userManagement: false,
-    scheduleManagement: false,
-    analytics: false,
-    systemData: false,
-    academicData: false,
   });
 
   useEffect(() => {
@@ -83,116 +73,8 @@ const AdminSideBar = () => {
       title: "Dashboard",
       icon: HomeIcon,
       gradient: "from-green-500 to-green-600",
-      children: [{ title: "Home", icon: HomeIcon, route: "/admin" }],
-    },
-    {
-      key: "userManagement",
-      title: "User Management",
-      icon: Users,
-      gradient: "from-blue-500 to-purple-600",
-      children: [
-        { title: "All", icon: Users, route: "/user-management" },
-        {
-          title: "Admins",
-          icon: Shield,
-          route: "/user-management?role=admin",
-        },
-        {
-          title: "Operators",
-          icon: User,
-          route: "/user-management?role=operator",
-        },
-        {
-          title: "Invigilators",
-          icon: Eye,
-          route: "/user-management?role=invigilator",
-        },
-      ],
-    },
-    {
-      key: "scheduleManagement",
-      title: "Schedules",
-      icon: CalendarClock,
-      gradient: "from-yellow-500 to-orange-600",
-      children: [
-        {
-          title: "Schedules",
-          icon: Clock3,
-          route: "/schedules",
-        },
-        {
-          title: "Past Schedules",
-          icon: Clock3,
-          route: "/past-schedules",
-        },
-      ],
-    },
-    {
-      key: "analytics",
-      title: "Analytics",
-      icon: BarChart3,
-      gradient: "from-green-500 to-teal-600",
-      children: [
-        {
-          title: "User Analytics",
-          icon: TrendingUp,
-          route: "/analytics#user-analytics",
-        },
-        {
-          title: "Detection Performance",
-          icon: Activity,
-          route: "/analytics#detection-performance",
-        },
-        {
-          title: "Exam Analytics",
-          icon: FileText,
-          route: "/analytics#exam-analytics",
-        },
-      ],
-    },
-    {
-      key: "academicData",
-      title: "Academic Data",
-      icon: BookOpenCheck,
-      gradient: "from-indigo-500 to-blue-700",
-      children: [
-        {
-          title: "Positions",
-          icon: Briefcase,
-          route: "/academic-data/positions",
-        },
-        { title: "Courses", icon: Book, route: "/academic-data/courses" },
-        { title: "Rooms", icon: DoorOpen, route: "/academic-data/rooms" },
-      ],
-    },
-    {
-      key: "systemData",
-      title: "Content Management",
-      icon: FileText,
-      gradient: "from-orange-500 to-red-600",
-      children: [
-        {
-          title: "Homepage Data",
-          icon: Home,
-          route: "/system-data/home-page",
-        },
-        {
-          title: "Our Team Data",
-          icon: UserCheck,
-          route: "/system-data/our-team",
-        },
-        {
-          title: "About Us Data",
-          icon: Info,
-          route: "/system-data/about-us",
-        },
-        {
-          title: "Contact Us Data",
-          icon: Mail,
-          route: "/system-data/contact-us-data",
-        },
-      ],
-    },
+      children: [{ title: "Home", icon: HomeIcon, route: "/operator" }],
+    }
   ] as const;
 
   const isExpanded = isMobile ? true : !sidebarCollapsed;
@@ -257,7 +139,7 @@ const AdminSideBar = () => {
                 }`}
               >
                 <Link
-                  href="/admin"
+                  href="/operator"
                   className="w-10 h-10 p-1 bg-gradient-to-br from-green-500 via-green-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg"
                 >
                   <Image
@@ -275,7 +157,7 @@ const AdminSideBar = () => {
                       Detector
                     </h1>
                     <p className="text-xs text-gray-500 font-medium">
-                      Admin Dashboard
+                      Operator Dashboard
                     </p>
                   </div>
                 )}
@@ -421,4 +303,4 @@ const AdminSideBar = () => {
   );
 };
 
-export default AdminSideBar;
+export default OperatorSideBar;

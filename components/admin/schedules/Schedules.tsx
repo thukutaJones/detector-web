@@ -29,7 +29,7 @@ const Schedules = ({
       {schedules?.map((schedule: any, index: number) => (
         <div
           key={index?.toString()}
-          className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300"
+          className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
         >
           {/* Schedule Header */}
           <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-8">
@@ -40,14 +40,14 @@ const Schedules = ({
                 </h3>
                 <div className="flex items-center gap-6 text-green-100">
                   <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    <span className="font-medium">
+                    <Users className="w-4 h-4" />
+                    <span className="font-medium text-sm">
                       {schedule?.operators?.length} Operators
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
-                    <span className="font-medium">
+                    <MapPin className="w-4 h-4" />
+                    <span className="font-medium text-sm">
                       {schedule?.exam_rooms?.length} Exam Rooms
                     </span>
                   </div>
@@ -59,9 +59,9 @@ const Schedules = ({
                     setSelectedSchedule(schedule);
                     setShowExamRoomModal(true);
                   }}
-                  className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2"
+                  className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 text-sm rounded-xl font-semibold transition-all duration-200 flex items-center gap-2"
                 >
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-4 h-4" />
                   Add Room
                 </button>
                 <button
@@ -87,8 +87,8 @@ const Schedules = ({
             <div className="p-8 space-y-8">
               {/* Operators Section */}
               <div>
-                <h4 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Users className="w-6 h-6 text-green-600" />
+                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-green-600" />
                   Assigned Operators
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -102,10 +102,10 @@ const Schedules = ({
                           <User className="w-6 h-6 text-green-600" />
                         </div>
                         <div>
-                          <h5 className="font-semibold text-gray-900">
+                          <h5 className="font-semibold text-sm text-gray-900">
                             {operator?.fullName}
                           </h5>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs text-gray-600">
                             {operator?.email}
                           </p>
                         </div>
@@ -134,7 +134,7 @@ const Schedules = ({
                             <div className="flex items-center gap-2 text-green-600">
                               <MapPin className="w-5 h-5" />
                               <span className="font-semibold text-gray-900">
-                                {room?.room_id}
+                                {room?.room?.name || room?.room_id}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">

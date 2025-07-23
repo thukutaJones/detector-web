@@ -174,7 +174,6 @@ export default function DetectorSchedules() {
         <AddScheduleModal
           setShowScheduleModal={setShowScheduleModal}
           callBack={fetchSchedules}
-          handleAlert={(alert: AlertProps) => setAlertContent(alert)}
         />
       )}
 

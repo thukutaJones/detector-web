@@ -170,7 +170,6 @@ const UserManagement = () => {
         <AddUserModal
           setShowAddModal={setShowAddModal}
           callBack={fetchUsers}
-          handleAlert={(alert: AlertProps) => setAlertContent(alert)}
         />
       )}
 
