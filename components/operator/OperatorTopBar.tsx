@@ -21,7 +21,7 @@ const OperatorTopBar = ({ cameras }: { cameras: any }) => {
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-green-700 font-bold text-xs">
-                  {cameras.filter((c: any) => c.active).length} Active Cameras
+                  {cameras.length} Active Cameras
                 </span>
               </div>
             </div>
