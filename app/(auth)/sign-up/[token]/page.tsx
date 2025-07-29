@@ -64,7 +64,7 @@ const DetectorLogin: React.FC = () => {
     }
     setIsLoading(true);
     try {
-      const res = await axios.post(`${baseUrl}/users/new-password`, {
+      const res = await axios.post(`${baseUrl}/api/v1/auth/set-password`, {
         token,
         password: password?.comfirmPassword,
       });
