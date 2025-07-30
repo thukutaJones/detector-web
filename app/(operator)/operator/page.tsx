@@ -51,8 +51,10 @@ interface Alert {
 
 interface ScheduleData {
   date: string;
-  operators: { fullName: string; role: string; status: string }[];
-  exam_rooms: ExamRoom[];
+  operators: any[];
+  rooms: ExamRoom[];
+  day: string;
+  time: string;
 }
 
 interface AlertProps {
@@ -79,7 +81,9 @@ const OperatorDashboard: React.FC = () => {
   const [scheduleData, setScheduleData] = useState<ScheduleData>({
     date: "",
     operators: [],
-    exam_rooms: [],
+    rooms: [],
+    day: "",
+    time: "",
   });
 
   const getAllCameras = () => {
@@ -90,14 +94,14 @@ const OperatorDashboard: React.FC = () => {
       roomId: string;
       active: boolean;
     }[] = [];
-    scheduleData.exam_rooms.forEach((room) => {
-      if (selectedRoom === "all" || room.room.name === selectedRoom) {
-        room.camera_urls.forEach((url, idx) => {
+    scheduleData?.rooms.forEach((room: any) => {
+      if (selectedRoom === "all" || room?.room === selectedRoom) {
+        room.camera_urls.forEach((url: any, idx: number) => {
           const cameraName =
             url.split("/").pop()?.replace("-", " ") || `Camera ${idx + 1}`;
           cameras.push({
             url,
-            roomName: room.room.name,
+            roomName: room?.room,
             cameraName:
               cameraName.charAt(0).toUpperCase() + cameraName.slice(1),
             roomId: room.id,
@@ -124,9 +128,9 @@ const OperatorDashboard: React.FC = () => {
   const cameras = getAllCameras();
   const filteredRooms =
     selectedRoom === "all"
-      ? scheduleData.exam_rooms
-      : scheduleData.exam_rooms.filter(
-          (room) => room.room.name === selectedRoom
+      ? scheduleData.rooms
+      : scheduleData.rooms.filter(
+          (room: any) => room.room.name === selectedRoom
         );
 
   const fectScheduleData = async () => {
@@ -134,7 +138,7 @@ const OperatorDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const res = await axios.get(
-        `${baseUrl}/schedules/active/${user?.user?.id}
+        `${baseUrl}/api/v1/schedule/today/${user?.user?.id}
 `,
         {
           headers: {
@@ -144,7 +148,9 @@ const OperatorDashboard: React.FC = () => {
       );
       console.log("Schedule data fetched:", res.data);
       setScheduleData(
-        res.data ? res.data[0] : { date: "", exam_rooms: [], operators: [] }
+        res.data
+          ? res.data?.schedules[0]
+          : { date: "", day: "", rooms: [], operators: [] }
       );
     } catch (error: any) {
       console.error("Error fetching schedule data:", error);
@@ -209,9 +215,9 @@ const OperatorDashboard: React.FC = () => {
 
               {viewMode === "room-by-room" && (
                 <div className="space-y-6">
-                  {filteredRooms.map((room) => (
+                  {filteredRooms.map((room: any, index: number) => (
                     <div
-                      key={room.id}
+                      key={index?.toString()}
                       className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
                     >
                       <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
@@ -223,33 +229,35 @@ const OperatorDashboard: React.FC = () => {
                             <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
-                                {room.start_time} - {room.end_time}
+                                {scheduleData?.time}
                               </span>
                               <span className="flex items-center gap-1">
                                 <BookOpen className="h-4 w-4" />
-                                {room.courses.map((c) => c.name).join(", ")}
+                                {room?.courses
+                                  ?.map((c: any) => c?.course_code)
+                                  .join(", ")}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Camera className="h-4 w-4" />
-                                {room.camera_urls.length} cameras
+                                {room?.camera_urls?.length} cameras
                               </span>
                             </div>
                           </div>
                           <div
                             className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              room.active
+                              room.camera_urls?.length
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {room.active ? "Active" : "Inactive"}
+                            {room.camera_urls?.length ? "Active" : "Inactive"}
                           </div>
                         </div>
                       </div>
 
                       <div className="p-6">
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                          {room.camera_urls.map((url, idx) => {
+                          {room.camera_urls.map((url: any, idx:number) => {
                             const cameraName =
                               url.split("/").pop()?.replace("-", " ") ||
                               `Camera ${idx + 1}`;
@@ -277,15 +285,15 @@ const OperatorDashboard: React.FC = () => {
                 <div className="flex flex-col">
                   <div className="flex-1 w-full">
                     {cameras.map((camera, idx) => {
-                      const cameraId = `${camera.roomId}-${idx}`;
+                      const cameraId = `${camera?.roomId}-${idx}`;
                       if (cameraId === focusedCamera) {
                         return (
                           <div key={cameraId} className="flex gap-4 w-full">
                             <div className="flex-1">
                               <CameraFeed
-                                url={camera.url}
-                                roomName={camera.roomName}
-                                isActive={camera.active}
+                                url={camera?.url}
+                                roomName={camera?.roomName}
+                                isActive={camera?.active}
                                 isFocused={true}
                                 onFocus={() => {
                                   setFocusedCamera(cameraId);
