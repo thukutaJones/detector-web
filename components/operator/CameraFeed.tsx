@@ -21,15 +21,20 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
   const [imageData, setImageData] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const socketRef = useRef<any>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Update timestamp every second
   useEffect(() => {
-    // Set up timestamp
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setTimestamp(new Date().toLocaleTimeString());
     }, 1000);
-    return () => clearInterval(interval);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
+  // Handle socket connection and streaming
   useEffect(() => {
     const socket = io(url, {
       transports: ["websocket"],
@@ -37,12 +42,14 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
     });
     socketRef.current = socket;
 
-    // Start the stream
-    socket.emit("start_stream", {
-      url, // stream source URL
-      room: roomName,
-      method: "MANUAL", // optional, you can adjust
-      exam_id: "12345", // optional, placeholder
+    socket.on("connect", () => {
+      // Start the stream when socket connects (including on reconnect)
+      socket.emit("start_stream", {
+        url,
+        room: roomName,
+        method: "MANUAL", // Optional — customize if needed
+        exam_id: "12345", // Optional — replace with real exam_id
+      });
     });
 
     socket.on("stream_frame", (data) => {
@@ -71,20 +78,26 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
         isFocused ? "ring-2 ring-green-600 scale-[1.01]" : "hover:scale-[1.01]"
       }`}
     >
-      {imageData && !hasError ? (
-        <img
-          src={imageData}
-          alt={`Stream from ${roomName}`}
-          className="w-full h-full object-cover"
-        />
-      ) : (
+      {/* Video feed display logic */}
+      {!imageData && !hasError ? (
+        <div className="flex justify-center items-center h-[30vh] text-gray-500 text-sm">
+          Loading stream...
+        </div>
+      ) : hasError ? (
         <img
           src="/videoFeedError.png"
           alt="Stream Error"
           className="object-contain h-[30vh] w-full"
         />
+      ) : (
+        <img
+          src={imageData|| '/videoFeedError.png'}
+          alt={`Stream from ${roomName}`}
+          className="w-full h-full object-cover"
+        />
       )}
 
+      {/* Top status bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white text-xs p-2 flex justify-between items-center z-10">
         <span className="font-semibold">{roomName}</span>
         <div className="flex items-center gap-2">
@@ -97,6 +110,7 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
         </div>
       </div>
 
+      {/* Focus button overlay */}
       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/40 to-transparent">
         <div className="flex justify-end">
           {onFocus && (
