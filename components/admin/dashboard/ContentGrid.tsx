@@ -50,25 +50,24 @@ const ContentGrid = ({
 
   const liveMetrics = [
     {
-      label: 'Total Logs',
+      label: "Total Logs",
       value: liveMetricsData.total_logs,
-      status: liveMetricsData.total_logs > 0 ? 'optimal' : 'warning',
+      status: liveMetricsData.total_logs > 0 ? "optimal" : "warning",
       pulse: false,
     },
     {
-      label: 'Info Logs',
+      label: "Info Logs",
       value: liveMetricsData.info_logs,
-      status: liveMetricsData.info_logs > 0 ? 'excellent' : 'warning',
+      status: liveMetricsData.info_logs > 0 ? "excellent" : "warning",
       pulse: true,
     },
     {
-      label: 'Error Logs',
+      label: "Error Logs",
       value: liveMetricsData.error_logs,
-      status: liveMetricsData.error_logs > 0 ? 'warning' : 'optimal',
+      status: liveMetricsData.error_logs > 0 ? "warning" : "optimal",
       pulse: liveMetricsData.error_logs > 0,
     },
   ];
-
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -87,9 +86,7 @@ const ContentGrid = ({
               <h2 className="text-xl font-bold text-gray-900">
                 System activities
               </h2>
-              <p className="text-sm text-gray-500">
-                System log events
-              </p>
+              <p className="text-sm text-gray-500">System log events</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -120,14 +117,16 @@ const ContentGrid = ({
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {log.message}
+                    <p className="text-sm font-semibold text-gray-600">
+                      {log.message.length > 50
+                        ? log.message.slice(0, 50) + "..."
+                        : log.message}
                     </p>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">
                       {log.message_type}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-4 mt-1">
+                  <div className="flex items-center space-x-4  mt-1">
                     <p className="text-xs text-gray-600">{log.endpoint}</p>
                     <span className="text-xs text-gray-400">•</span>
                     <p className="text-xs text-gray-500">{log.user_id}</p>
@@ -147,54 +146,58 @@ const ContentGrid = ({
         </div>
       </div>
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-100/50">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-            <Brain className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">System Log</h2>
-            <p className="text-sm text-gray-500">System performance data</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Brain className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">System Log</h2>
+              <p className="text-sm text-gray-500">System performance data</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="space-y-6">
-        {liveMetrics.map((metric: any, index: number) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl hover:bg-gray-100/50 transition-colors duration-300"
-          >
-            <div className="flex items-center space-x-3">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  metric.status === 'optimal'
-                    ? 'bg-green-500'
-                    : metric.status === 'excellent'
-                    ? 'bg-blue-500'
-                    : 'bg-yellow-500'
-                } ${metric.pulse ? 'animate-pulse' : ''}`}
-              ></div>
-              <span className="text-sm font-medium text-gray-700">{metric.label}</span>
+        <div className="space-y-6">
+          {liveMetrics.map((metric: any, index: number) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl hover:bg-gray-100/50 transition-colors duration-300"
+            >
+              <div className="flex items-center space-x-3">
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    metric.status === "optimal"
+                      ? "bg-green-500"
+                      : metric.status === "excellent"
+                      ? "bg-blue-500"
+                      : "bg-yellow-500"
+                  } ${metric.pulse ? "animate-pulse" : ""}`}
+                ></div>
+                <span className="text-sm font-medium text-gray-700">
+                  {metric.label}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-bold text-gray-900">
+                  {metric.value}
+                </span>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full font-medium ${
+                    metric.status === "optimal"
+                      ? "bg-green-100 text-green-700"
+                      : metric.status === "excellent"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {metric.status}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-bold text-gray-900">{metric.value}</span>
-              <span
-                className={`text-xs px-2 py-1 rounded-full font-medium ${
-                  metric.status === 'optimal'
-                    ? 'bg-green-100 text-green-700'
-                    : metric.status === 'excellent'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-yellow-100 text-yellow-700'
-                }`}
-              >
-                {metric.status}
-              </span>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
     </div>
   );
 };

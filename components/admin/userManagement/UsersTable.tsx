@@ -23,13 +23,15 @@ interface RoleType {
 interface UsersTableProps {
   filteredUsers: UserType[];
   roles: RoleType[];
-  handleStatusToggle?: (id: string, status?: string) => void;
+  handleStatusToggle: any;
+  handlePressEdit: any;
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({
   filteredUsers,
   roles,
   handleStatusToggle,
+  handlePressEdit,
 }) => {
   const getRoleIcon = (role: string): React.ElementType => {
     const roleData = roles.find((r) => r.value === role);
@@ -46,125 +48,122 @@ const UsersTable: React.FC<UsersTableProps> = ({
   };
 
   return (
-    <div className="px-4 h-[calc(100vh-200px)] flex flex-col">
+    <div className="px-2 sm:px-4 h-[calc(100vh-200px)] flex flex-col">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="overflow-x-auto">
-          <table className="w-full table-fixed">
+        {/* Scrollable Table Container */}
+        <div className="overflow-auto w-full scroll-container">
+          <table className="min-w-[700px] w-full text-sm text-left">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               <tr>
-                {["User", "Contact", "Role", "Last Login", "Actions"].map(
-                  (heading) => (
-                    <th
-                      key={heading}
-                      className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                    >
-                      {heading}
-                    </th>
-                  )
-                )}
+                {[
+                  "User",
+                  "Contact",
+                  "Role",
+                  "Last Login",
+                  "Status",
+                  "Actions",
+                ].map((heading) => (
+                  <th
+                    key={heading}
+                    className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap"
+                  >
+                    {heading}
+                  </th>
+                ))}
               </tr>
             </thead>
-          </table>
-        </div>
-
-        {/* Scrollable body */}
-        <div className="overflow-y-auto flex-1">
-          <table className="w-full table-fixed">
             <tbody className="divide-y divide-gray-200">
               {filteredUsers.map((user, index) => {
                 const RoleIcon = getRoleIcon(user.role);
                 return (
                   <tr
                     key={user.id || index}
-                    className="hover:bg-gray-50 transition-colors duration-150"
+                    className="hover:bg-gray-50 transition duration-150"
                   >
                     {/* User Info */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-12 w-12">
-                          <Image
-                            className="h-12 w-12 rounded-full object-cover ring-2 ring-gray-200"
-                            src="/profile.png"
-                            alt={user.fullName}
-                            height={200}
-                            width={200}
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-semibold text-gray-900">
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-3">
+                        <Image
+                          className="h-10 w-10 rounded-full object-cover ring-2 ring-gray-200"
+                          src="/profile.png"
+                          alt={user.fullName}
+                          height={40}
+                          width={40}
+                        />
+                        <div>
+                          <p className="font-medium text-gray-900">
                             {user.fullName}
-                          </div>
-                          <div className="text-sm text-gray-500">
+                          </p>
+                          <p className="text-gray-500 text-xs">
                             {user.position}
-                          </div>
+                          </p>
                         </div>
                       </div>
                     </td>
 
                     {/* Contact */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.email}</div>
-                      <div className="text-sm text-gray-500">{user.phone}</div>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <p className="text-gray-900">{user.email}</p>
+                      <p className="text-gray-500 text-xs">{user.phone}</p>
                     </td>
 
                     {/* Role */}
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(
                           user.role
                         )}`}
                       >
                         <RoleIcon className="w-3 h-3 mr-1" />
-                        {user.role.charAt(0).toUpperCase() +
-                          user.role.slice(1)}
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </span>
                     </td>
 
                     {/* Last Login */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-4 whitespace-nowrap text-gray-500 text-sm">
                       {user.lastLogin ? (
                         <p>{new Date(user.lastLogin).toLocaleDateString()}</p>
                       ) : (
-                        <p className="text-3xl text-gray-600">--</p>
+                        <span className="text-2xl text-gray-400">--</span>
                       )}
                     </td>
 
-                    {/* Actions */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        {/* Optional Status Toggle */}
-                        {/* {handleStatusToggle && (
-                          <button
-                            onClick={() =>
-                              handleStatusToggle(user.id, user.status)
-                            }
-                            className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 transform hover:scale-105 ${
-                              user.status === "active"
-                                ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                : "bg-green-100 text-green-700 hover:bg-green-200"
-                            }`}
-                          >
-                            {user.status === "active" ? (
-                              <>
-                                <PowerOff className="w-3 h-3 mr-1" />
-                                Deactivate
-                              </>
-                            ) : (
-                              <>
-                                <Power className="w-3 h-3 mr-1" />
-                                Activate
-                              </>
-                            )}
-                          </button>
-                        )} */}
-
-                        {/* Edit */}
-                        <button className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md text-xs font-medium hover:bg-yellow-200 transition-all duration-200 transform hover:scale-105">
-                          <Edit className="w-3 h-3 mr-1" />
-                          Edit
+                    {/* Status / Actions */}
+                    <td className="px-4 py-4 whitespace-nowrap text-sm">
+                      {user?.role !== "admin" && (
+                        <button
+                          onClick={() =>
+                            handleStatusToggle(user.id, user.status)
+                          }
+                          className={`inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium transition hover:scale-105 ${
+                            user.status === "active"
+                              ? "bg-red-100 text-red-700 hover:bg-red-200"
+                              : "bg-green-100 text-green-700 hover:bg-green-200"
+                          }`}
+                        >
+                          {user.status === "active" ? (
+                            <>
+                              <PowerOff className="w-3 h-3 mr-1" />
+                              Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <Power className="w-3 h-3 mr-1" />
+                              Activate
+                            </>
+                          )}
                         </button>
-                      </div>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <button
+                        className="inline-flex items-center px-2.5 py-1.5 bg-yellow-100 text-yellow-700 rounded-md text-xs font-medium hover:bg-yellow-200 transition hover:scale-105"
+                        onClick={async () => await handlePressEdit(user)}
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        Edit
+                      </button>
                     </td>
                   </tr>
                 );

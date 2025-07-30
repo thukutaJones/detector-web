@@ -27,14 +27,15 @@ const Dashboard = () => {
     if (!user) return;
     try {
       setIsLoading(true);
-      const res = await axios.get(`${baseUrl}/admin-dashboard/`, {
+      const res = await axios.get(`${baseUrl}/api/v1/admin-stats`, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
         },
       });
 
-      setStats(res.data);
+      setStats(res.data?.stats);
     } catch (error: any) {
+      console.log(error)
       setAlertContent({
         message:
           error?.response?.data?.detail ||
@@ -54,7 +55,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex-1 flex flex-col h-screen">
-      <DashboardTopBar />
+      <DashboardTopBar name={stats?.user?.fullName} />
       <main className="flex-1 overflow-auto bg-transparent">
         <div className="p-8 space-y-8">
           <StatsGrid

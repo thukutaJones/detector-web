@@ -1,17 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-
-import MngTopBar from "@/components/academicData/MngTopBar";
-import EmptyScheduleComponent from "@/components/admin/schedules/EmptyScheduleComponent";
-import Schedules from "@/components/admin/schedules/Schedules";
-import AddScheduleModal from "@/components/admin/schedules/AddScheduleModal";
-import AddExamModal from "@/components/admin/schedules/AddExamModal";
-import { useAuth } from "@/hooks/useAuth";
+import React, { useState, useEffect, useRef } from "react";
+import { Shield, AlertTriangle } from "lucide-react";
+import SchedulesTopBar from "@/components/admin/schedules/SchedulesTopBar";
+import Content from "@/components/admin/schedules/Content";
+import EditModal from "@/components/admin/schedules/EditModal";
 import ManagementLoading from "@/components/academicData/ManagementLoading";
-import { baseUrl } from "@/constants/baseUrl";
-import axios from "axios";
+import { useAuth } from "@/hooks/useAuth";
 import { Alert } from "@/components/Alert";
+import { error } from "console";
+import axios from "axios";
+import { baseUrl } from "@/constants/baseUrl";
+import FastBouncingDots from "@/components/BouncingAnimation";
+
+interface ConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  isDeleting?: boolean;
+  type: "danger" | "warning" | "info";
+}
 
 interface AlertProps {
   message: string;
@@ -19,182 +29,208 @@ interface AlertProps {
   onClose?: () => void;
 }
 
-export default function DetectorSchedules() {
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  type,
+  isDeleting,
+}) => {
+  if (!isOpen) return null;
+
+  const typeStyles = {
+    danger: "text-red-600",
+    warning: "text-yellow-600",
+    info: "text-blue-600",
+  };
+
+  const buttonStyles = {
+    danger: "bg-red-600 hover:bg-red-700",
+    warning: "bg-yellow-600 hover:bg-yellow-700",
+    info: "bg-blue-600 hover:bg-blue-700",
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="relative bg-white rounded-2xl p-6 mx-4 max-w-md w-full shadow-2xl transform animate-in fade-in duration-200">
+        <div className="flex items-center mb-4">
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              type === "danger"
+                ? "bg-red-100"
+                : type === "warning"
+                ? "bg-yellow-100"
+                : "bg-blue-100"
+            }`}
+          >
+            <AlertTriangle className={`w-6 h-6 ${typeStyles[type]}`} />
+          </div>
+          <div className="ml-4">
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <p className="text-gray-600 text-sm">{message}</p>
+          </div>
+        </div>
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isDeleting}
+            className={`px-4 py-2 text-white font-medium rounded-lg transition-colors duration-200 ${buttonStyles[type]}`}
+          >
+            {isDeleting ? <FastBouncingDots /> : <p>Confirm</p>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SchedulesPage: React.FC = () => {
   const user = useAuth(["admin"]);
   const [schedules, setSchedules] = useState<any[]>([]);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [showExamRoomModal, setShowExamRoomModal] = useState(false);
-  const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
-  const [expandedSchedule, setExpandedSchedule] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const [editingSchedule, setEditingSchedule] = useState<string | null>(null);
+  const [editData, setEditData] = useState<any>(null);
   const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
-  const [rooms, setRooms] = useState<any[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
-  const [invigilators, setInvigilators] = useState<any[]>([]);
-  const [isFetchingSchedules, setIsfetchingSchdules] = useState<boolean>(false);
-  const [isFetchingCourses, setIsfetchingCourses] = useState<boolean>(false);
-  const [isFetchingInvigilators, setIsfetchingInvigilators] =
-    useState<boolean>(false);
-  const [isFetchingRooms, setIsfetchingRooms] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "danger" | "warning" | "info";
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+    onConfirm: () => {},
+  });
+
+  const handleDelete = (scheduleId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Schedule",
+      message:
+        "Are you sure you want to delete this schedule? This action cannot be undone.",
+      type: "danger",
+      onConfirm: async () => {
+        await handleConfirmDelete(scheduleId);
+        setConfirmModal({ ...confirmModal, isOpen: false });
+      },
+    });
+  };
+
+  const handleConfirmDelete = async (id: string) => {
+    if (!user) return;
+    try {
+      setIsDeleting(false);
+      await axios.delete(`${baseUrl}/api/v1/schedule/${id}`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
+      await fetchSchedules();
+    } catch (error: any) {
+      setAlertContent({
+        variant: "error",
+        message:
+          error?.response?.data?.detail ||
+          "Something went wrong|| Please try again",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const startEdit = (schedule: any) => {
+    setEditingSchedule(schedule.id);
+    setEditData({ ...schedule });
+  };
+
+  const cancelEdit = () => {
+    setEditingSchedule(null);
+    setEditData(null);
+  };
 
   const fetchSchedules = async () => {
     if (!user) return;
-    setIsfetchingSchdules(true);
     try {
-      const res = await axios.get(`${baseUrl}/schedules`, {
+      setLoading(true);
+      const res = await axios.get(`${baseUrl}/api/v1/schedule`, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
         },
       });
-
-      setSchedules(res.data);
+      setSchedules(res.data?.schedules);
     } catch (error: any) {
       setAlertContent({
+        variant: "error",
         message:
           error?.response?.data?.detail ||
-          "Something went wrong!! Please try again",
-        variant: "error",
+          "Something went wrong|| Please try again",
       });
     } finally {
-      setIsfetchingSchdules(false);
-    }
-  };
-
-  const fetchRooms = async () => {
-    if (!user) return;
-    setIsfetchingRooms(true);
-    try {
-      const res = await axios.get(`${baseUrl}/rooms`, {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
-      });
-
-      setRooms(res.data?.rooms);
-    } catch (error: any) {
-      setAlertContent({
-        message:
-          error?.response?.data?.detail ||
-          "Something went wrong!! Please try again",
-        variant: "error",
-      });
-    } finally {
-      setIsfetchingRooms(false);
-    }
-  };
-
-  const fetchCourses = async () => {
-    if (!user) return;
-    setIsfetchingCourses(true);
-    try {
-      const res = await axios.get(`${baseUrl}/courses`, {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
-      });
-
-      setCourses(res.data?.courses);
-    } catch (error: any) {
-      setAlertContent({
-        message:
-          error?.response?.data?.detail ||
-          "Something went wrong!! Please try again",
-        variant: "error",
-      });
-    } finally {
-      setIsfetchingCourses(false);
-    }
-  };
-
-  const fetchInvigilators = async () => {
-    if (!user) return;
-    setIsfetchingInvigilators(true);
-    try {
-      const res = await axios.get(`${baseUrl}/users/role/invigilator`, {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
-      });
-
-      setInvigilators(res.data?.users);
-    } catch (error: any) {
-      setAlertContent({
-        message:
-          error?.response?.data?.detail ||
-          "Something went wrong!! Please try again",
-        variant: "error",
-      });
-    } finally {
-      setIsfetchingInvigilators(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchSchedules();
-    fetchRooms();
-    fetchCourses();
-    fetchInvigilators();
   }, [user]);
 
-  if (
-    !user ||
-    isFetchingSchedules ||
-    isFetchingCourses ||
-    isFetchingInvigilators ||
-    isFetchingRooms
-  )
+  if (!user || loading) {
     return <ManagementLoading />;
+  }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-50 via-white to-green-50">
-      <MngTopBar
-        setShowAddModal={setShowScheduleModal}
-        title="Exam Schedules"
-        message="Manage and monitor your examination schedules with precision"
-        buttonText="Create Schedule"
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50">
+      <SchedulesTopBar fileInputRef={fileInputRef} callBack={fetchSchedules} />
+      <Content
+        schedules={schedules}
+        fileInputRef={fileInputRef}
+        startEdit={startEdit}
+        handleDelete={handleDelete}
       />
-      <div className="h-[calc(100vh-100px)] p-8 scroll-container overflow-auto ">
-        {!schedules?.length ? (
-          <EmptyScheduleComponent setShowScheduleModal={setShowScheduleModal} />
-        ) : (
-          <Schedules
-            schedules={schedules}
-            setShowExamRoomModal={setShowExamRoomModal}
-            setSelectedSchedule={setSelectedSchedule}
-            setExpandedSchedule={setExpandedSchedule}
-            expandedSchedule={expandedSchedule}
-            // rooms={rooms}
-            // courses={courses}
-            // invigilators={invigilators}
-          />
-        )}
-      </div>
-
-      {/* Add Schedule Modal */}
-      {showScheduleModal && (
-        <AddScheduleModal
-          setShowScheduleModal={setShowScheduleModal}
-          callBack={fetchSchedules}
+      {editingSchedule && editData && (
+        <EditModal
+          setEditData={setEditData}
+          cancelEdit={cancelEdit}
+          editData={editData}
+          callback={fetchSchedules}
         />
       )}
-
-      {/* Add Exam Room Modal */}
-      {showExamRoomModal && selectedSchedule && (
-        <AddExamModal
-          setShowExamRoomModal={setShowExamRoomModal}
-          callBack={fetchSchedules}
-          rooms={rooms}
-          courses={courses}
-          invigilators={invigilators}
-          handleAlert={(alert: AlertProps) => setAlertContent(alert)}
-          selectedSchedule={selectedSchedule}
-        />
-      )}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        isDeleting={isDeleting}
+      />
       {alertContent && (
         <Alert
-          message={alertContent?.message}
           variant={alertContent?.variant}
+          message={alertContent?.message}
         />
       )}
     </div>
   );
-}
+};
+
+export default SchedulesPage;

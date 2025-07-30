@@ -36,6 +36,7 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import axios from "axios";
 import { baseUrl } from "@/constants/baseUrl";
+import { getInitials } from "@/utils/getInitials";
 
 type MenuKey =
   | "dashboard"
@@ -150,21 +151,16 @@ const AdminSideBar = () => {
         },
       ],
     },
-    {
-      key: "academicData",
-      title: "Academic Data",
-      icon: BookOpenCheck,
-      gradient: "from-indigo-500 to-blue-700",
-      children: [
-        {
-          title: "Positions",
-          icon: Briefcase,
-          route: "/academic-data/positions",
-        },
-        { title: "Courses", icon: Book, route: "/academic-data/courses" },
-        { title: "Rooms", icon: DoorOpen, route: "/academic-data/rooms" },
-      ],
-    },
+    // {
+    //   key: "academicData",
+    //   title: "Academic Data",
+    //   icon: BookOpenCheck,
+    //   gradient: "from-indigo-500 to-blue-700",
+    //   children: [
+    //     { title: "Courses", icon: Book, route: "/academic-data/courses" },
+    //     { title: "Rooms", icon: DoorOpen, route: "/academic-data/rooms" },
+    //   ],
+    // },
     {
       key: "systemData",
       title: "Content Management",
@@ -200,13 +196,12 @@ const AdminSideBar = () => {
   const fetchUser = async () => {
     if (!user) return;
     try {
-      const res = await axios.get(`${baseUrl}/users/${user?.user?.id}`, {
+      const res = await axios.get(`${baseUrl}/api/v1/user/${user?.user?.id}`, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
         },
       });
-      setUserData(res?.data);
-      console.log(res);
+      setUserData(res?.data?.user);
     } catch (error) {
       console.log(error);
     }
@@ -260,13 +255,12 @@ const AdminSideBar = () => {
                   href="/admin"
                   className="w-10 h-10 p-1 bg-gradient-to-br from-green-500 via-green-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg"
                 >
-                  <Image
+                  <img
                     src="/logoWhite.png"
                     width={200}
                     height={200}
                     alt="logo"
                     className="w-full h-full"
-                    priority
                   />
                 </Link>
                 {isExpanded && (
@@ -399,7 +393,9 @@ const AdminSideBar = () => {
             >
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white text-sm font-bold">JD</span>
+                  <span className="text-white text-sm font-bold">
+                    {getInitials(userData?.fullName)}
+                  </span>
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
               </div>

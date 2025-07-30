@@ -12,11 +12,13 @@ import { baseUrl } from "@/constants/baseUrl";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert } from "@/components/Alert";
 import ManagementLoading from "@/components/academicData/ManagementLoading";
+import EditUserModal from "@/components/admin/userManagement/EditUser";
 
 type ConfirmActionType = {
-  type: "activate" | "deactivate";
+  type: "activate" | "inactivate";
   userId: string;
-  currentStatus: "active" | "inactive";
+  currentStatus: string;
+  newStatus: string;
 } | null;
 
 interface AlertProps {
@@ -38,6 +40,9 @@ const UserManagement = () => {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isChangingStatus, setIsChangingStatus] = useState<boolean>(false);
+  const [userToEdit, setUserToEdit] = useState<any>({});
+  const [toggleEdit, setToggleEdit] = useState<boolean>(false);
 
   const roles = [
     { value: "all", label: "All Roles", icon: Users },
@@ -50,12 +55,13 @@ const UserManagement = () => {
     if (!user) return;
     setIsLoading(true);
     try {
-      const res = await axios.get(`${baseUrl}/users`, {
+      const res = await axios.get(`${baseUrl}/api/v1/user`, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
         },
       });
       setUsers(res.data?.users);
+      console.log(res.data?.users);
     } catch (error: any) {
       setAlertContent({
         message:
@@ -74,12 +80,14 @@ const UserManagement = () => {
   }, [user]);
 
   useEffect(() => {
+    // On initial load, read role from URL
     const urlParams = new URLSearchParams(window.location.search);
     const roleParam = urlParams.get("role") || "all";
     setSelectedRole(roleParam);
-  }, []);
+  }, []); // Only run once on mount
 
   useEffect(() => {
+    // Update the URL when selectedRole changes
     const url = new URL(window.location.href);
     if (selectedRole === "all") {
       url.searchParams.delete("role");
@@ -88,7 +96,9 @@ const UserManagement = () => {
     }
     window.history.replaceState({}, "", url.toString());
 
+    // Filter users
     let filtered = [...users];
+
     if (selectedRole !== "all") {
       filtered = filtered.filter((user) => user.role === selectedRole);
     }
@@ -111,33 +121,40 @@ const UserManagement = () => {
     setShowRoleDropdown(false);
   };
 
-  const handleStatusToggle = (
-    userId: string,
-    currentStatus: "active" | "inactive"
-  ) => {
+  const handleStatusToggle = (userId: string, currentStatus: string) => {
     setConfirmAction({
-      type: currentStatus === "active" ? "deactivate" : "activate",
+      type: currentStatus === "active" ? "inactivate" : "activate",
       userId,
       currentStatus,
+      newStatus: currentStatus === "active" ? "inactive" : "active",
     });
     setShowConfirmModal(true);
   };
 
-  const confirmStatusChange = () => {
+  const confirmStatusChange = async () => {
     if (confirmAction) {
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user._id === confirmAction.userId
-            ? {
-                ...user,
-                status:
-                  confirmAction.currentStatus === "active"
-                    ? "inactive"
-                    : "active",
-              }
-            : user
-        )
-      );
+      try {
+        setIsChangingStatus(true);
+        await axios.put(
+          `${baseUrl}/api/v1/user/change-status/${confirmAction?.userId}/${confirmAction?.newStatus}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${user?.token}`,
+            },
+          }
+        );
+        await fetchUsers();
+      } catch (error: any) {
+        setAlertContent({
+          variant: "error",
+          message:
+            error?.response?.data?.detail ||
+            "Something went wrong!! Please try again",
+        });
+      } finally {
+        setIsChangingStatus(false);
+      }
     }
     setShowConfirmModal(false);
     setConfirmAction(null);
@@ -164,11 +181,23 @@ const UserManagement = () => {
       <UsersTable
         filteredUsers={filteredUsers}
         roles={roles}
+        handleStatusToggle={(id: any, status: string) =>
+          handleStatusToggle(id, status)
+        }
+        handlePressEdit={(user: any) => {
+          setUserToEdit(user);
+          setToggleEdit(true);
+        }}
       />
 
       {showAddModal && (
-        <AddUserModal
-          setShowAddModal={setShowAddModal}
+        <AddUserModal setShowAddModal={setShowAddModal} callBack={fetchUsers} />
+      )}
+
+      {toggleEdit && (
+        <EditUserModal
+          setToggleEditModal={setToggleEdit}
+          oldUser={userToEdit}
           callBack={fetchUsers}
         />
       )}
@@ -178,6 +207,7 @@ const UserManagement = () => {
           confirmAction={confirmAction}
           setShowConfirmModal={setShowConfirmModal}
           confirmStatusChange={confirmStatusChange}
+          isLoading={isChangingStatus}
         />
       )}
 

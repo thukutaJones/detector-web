@@ -21,27 +21,27 @@ interface AlertProps {
   onClose?: () => void;
 }
 
-const AddUserModal = ({
-  setShowAddModal,
+const EditUserModal = ({
+  setToggleEditModal,
   callBack,
+  oldUser,
 }: {
-  setShowAddModal: any;
+  setToggleEditModal: any;
   callBack: any;
+  oldUser: any;
 }) => {
   const user = useAuth(["admin"]);
   const [newUser, setNewUser] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    role: "",
-    sex: "",
-    position: "",
+    fullName: oldUser?.fullName,
+    email: oldUser?.email,
+    phone: oldUser?.phone,
+    role: oldUser?.role,
+    sex: oldUser?.gender,
   });
   const [formError, setFormError] = useState<string>("");
 
-  const [showAddRoleDropdown, setShowAddRoleDropdown] = useState(false);
-  const [showAddPositionDropdown, setShowAddPositionDropdown] = useState(false);
-  const [isAddingUser, setIsAddingUser] = useState<boolean>(false);
+  const [showEditRoleDropdown, setShowEditRoleDropdown] = useState(false);
+  const [isEditinggUser, setIsEditingUser] = useState<boolean>(false);
 
   const roles = [
     { value: "all", label: "All Roles", icon: Users },
@@ -50,19 +50,9 @@ const AddUserModal = ({
     { value: "invigilator", label: "Invigilator", icon: Briefcase },
   ];
 
-  const positions = [
-    "System Administrator",
-    "Operations Manager",
-    "Senior Invigilator",
-    "HR Administrator",
-    "Lecturer",
-    "IT Support",
-    "Data Analyst",
-  ];
-
-  const handleAddUser = async (e: any) => {
+  const handleEditUser = async (e: any) => {
     e.preventDefault();
-    setIsAddingUser(true);
+    setIsEditingUser(true);
     setFormError("");
     try {
       const payload = {
@@ -79,14 +69,14 @@ const AddUserModal = ({
         return;
       }
 
-      await axios.post(`${baseUrl}/api/v1/auth/add-user`, payload, {
+      await axios.put(`${baseUrl}/api/v1/user/${oldUser?.id}`, payload, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
         },
       });
 
       callBack();
-      setShowAddModal(false);
+      setToggleEditModal(false);
     } catch (error: any) {
       console.log(error);
       setFormError(
@@ -94,7 +84,7 @@ const AddUserModal = ({
           "Something went wrong!! Please try again"
       );
     } finally {
-      setIsAddingUser(false);
+      setIsEditingUser(false);
     }
   };
 
@@ -103,9 +93,9 @@ const AddUserModal = ({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         <div className="bg-gradient-to-b from-green-600 via-green-500 to-transparent px-8 py-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Add New User</h2>
+            <h2 className="text-2xl font-bold text-white">Edit User</h2>
             <button
-              onClick={() => setShowAddModal(false)}
+              onClick={() => setToggleEditModal(false)}
               className="text-white hover:text-green-200 transition-colors duration-200"
             >
               <X className="w-6 h-6" />
@@ -148,11 +138,12 @@ const AddUserModal = ({
               </label>
               <input
                 type="email"
+                disabled={true}
                 value={newUser.email}
                 onChange={(e) =>
                   setNewUser({ ...newUser, email: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                 placeholder="Enter email address"
               />
             </div>
@@ -182,7 +173,7 @@ const AddUserModal = ({
               </label>
               <div className="relative">
                 <button
-                  onClick={() => setShowAddRoleDropdown(!showAddRoleDropdown)}
+                  onClick={() => setShowEditRoleDropdown(!showEditRoleDropdown)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 flex items-center justify-between bg-white"
                 >
                   <span
@@ -194,7 +185,7 @@ const AddUserModal = ({
                   </span>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 </button>
-                {showAddRoleDropdown && (
+                {showEditRoleDropdown && (
                   <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
                     {roles.slice(1).map((role: any) => {
                       const Icon = role.icon;
@@ -203,7 +194,7 @@ const AddUserModal = ({
                           key={role.value}
                           onClick={() => {
                             setNewUser({ ...newUser, role: role.value });
-                            setShowAddRoleDropdown(false);
+                            setShowEditRoleDropdown(false);
                           }}
                           className="w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-200"
                         >
@@ -216,47 +207,6 @@ const AddUserModal = ({
                 )}
               </div>
             </div>
-
-            {/* Position Dropdown */}
-            {/* <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <Briefcase className="w-4 h-4 inline mr-2" />
-                  Position
-                </label>
-                <div className="relative">
-                  <button
-                    onClick={() =>
-                      setShowAddPositionDropdown(!showAddPositionDropdown)
-                    }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 flex items-center justify-between bg-white"
-                  >
-                    <span
-                      className={
-                        newUser.position ? "text-gray-900" : "text-gray-500"
-                      }
-                    >
-                      {newUser.position || "Select position"}
-                    </span>
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
-                  </button>
-                  {showAddPositionDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                      {positions.map((position: any) => (
-                        <button
-                          key={position}
-                          onClick={() => {
-                            setNewUser({ ...newUser, position });
-                            setShowAddPositionDropdown(false);
-                          }}
-                          className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-200"
-                        >
-                          {position}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div> */}
 
             {/* Sex */}
             <div>
@@ -296,23 +246,23 @@ const AddUserModal = ({
 
           <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
             <button
-              onClick={() => setShowAddModal(false)}
+              onClick={() => setToggleEditModal(false)}
               className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
             >
               Cancel
             </button>
             <button
-              onClick={handleAddUser}
+              onClick={handleEditUser}
               disabled={
                 !newUser.fullName ||
                 !newUser.email ||
                 !newUser.role ||
-                isAddingUser
+                isEditinggUser
               }
               type="submit"
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
             >
-              {isAddingUser ? <FastBouncingDots /> : <p> Add User</p>}
+              {isEditinggUser ? <FastBouncingDots /> : <p> Edit User</p>}
             </button>
           </div>
         </div>
@@ -321,4 +271,4 @@ const AddUserModal = ({
   );
 };
 
-export default AddUserModal;
+export default EditUserModal;

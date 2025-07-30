@@ -16,6 +16,7 @@ import AnimatedBgElements from "@/components/auth/AnimatedBgEelments";
 import Image from "next/image";
 import axios from "axios";
 import { baseUrl } from "@/constants/baseUrl";
+import { decodeToken } from "@/utils/decodeToken";
 
 const DetectorLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -57,16 +58,23 @@ const DetectorLogin: React.FC = () => {
       // setShowOTP(true);
 
       localStorage.setItem("token", res.data?.token);
-      if (res.data?.user?.role === "admin") {
-        location.href = "/admin";
+      const decoded: any = await decodeToken(res?.data?.token);
+      console.log(decoded);
+      if (decoded?.user?.role === "admin") {
+        window.location.href = "/admin";
         return;
       }
-      if (res.data?.user?.role === "operator") {
-        location.href = "/operator";
+      if (decoded?.user?.role === "operator") {
+        window.location.href = "/operator";
         return;
       }
-
-      setOtpFormError("Your role is not allowed  here");
+      if (decoded?.user?.role === "invigilator") {
+        setFormError(
+          "Please download the mobile app to access the invigilator panel."
+        );
+        return;
+      }
+      setFormError("Your role is not allowed here");
     } catch (error: any) {
       console.log(error);
       setFormError(
