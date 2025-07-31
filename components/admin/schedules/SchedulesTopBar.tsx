@@ -1,3 +1,4 @@
+import { baseUrl } from "@/constants/baseUrl";
 import { useAuth } from "@/hooks/useAuth";
 import axios from "axios";
 import { Loader2, Upload } from "lucide-react";
@@ -28,7 +29,7 @@ const SchedulesTopBar = ({
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/v1/schedule/upload",
+        `${baseUrl}/api/v1/schedule/upload`,
         formData,
         {
           headers: {

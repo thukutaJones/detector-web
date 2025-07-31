@@ -1,3 +1,4 @@
+import { baseUrl } from "@/constants/baseUrl";
 import { Maximize2 } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
@@ -8,6 +9,7 @@ interface CameraFeedProps {
   isActive: boolean;
   isFocused?: boolean;
   onFocus?: () => void;
+  schedule_id: string;
 }
 
 const CameraFeed: React.FC<CameraFeedProps> = ({
@@ -16,6 +18,7 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
   isActive,
   isFocused = false,
   onFocus,
+  schedule_id
 }) => {
   const [timestamp, setTimestamp] = useState(new Date().toLocaleTimeString());
   const [imageData, setImageData] = useState<string | null>(null);
@@ -23,7 +26,6 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
   const socketRef = useRef<any>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Update timestamp every second
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setTimestamp(new Date().toLocaleTimeString());
@@ -34,21 +36,19 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
     };
   }, []);
 
-  // Handle socket connection and streaming
   useEffect(() => {
-    const socket = io(url, {
+    const socket = io(baseUrl, {
       transports: ["websocket"],
       reconnectionAttempts: 3,
     });
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      // Start the stream when socket connects (including on reconnect)
       socket.emit("start_stream", {
         url,
         room: roomName,
-        method: "MANUAL", // Optional — customize if needed
-        exam_id: "12345", // Optional — replace with real exam_id
+        method: "Network camera",
+        schedule_id: schedule_id,
       });
     });
 
@@ -70,7 +70,7 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
     return () => {
       socket.disconnect();
     };
-  }, [roomName, url]);
+  }, [roomName, url]); 
 
   return (
     <div
@@ -85,13 +85,13 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
         </div>
       ) : hasError ? (
         <img
-          src="/videoFeedError.png"
+          src="/videoFeedError1.jpg"
           alt="Stream Error"
-          className="object-contain h-[30vh] w-full"
+          className="object-cover h-[30vh] w-full"
         />
       ) : (
         <img
-          src={imageData|| '/videoFeedError.png'}
+          src={imageData|| '/videoFeedError1.jpg'}
           alt={`Stream from ${roomName}`}
           className="w-full h-full object-cover"
         />

@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import ManagementLoading from "@/components/academicData/ManagementLoading";
 import axios from "axios";
 import { baseUrl } from "@/constants/baseUrl";
+import { Alert } from "@/components/Alert";
 
 interface Course {
   name: string;
@@ -29,17 +30,6 @@ interface Room {
   id: string;
 }
 
-interface ExamRoom {
-  id: string;
-  room: Room;
-  courses: Course[];
-  invigilators: Invigilator[];
-  camera_urls: string[];
-  start_time: string;
-  end_time: string;
-  active: boolean;
-}
-
 interface Alert {
   id: number;
   type: "warning" | "alert" | "info";
@@ -52,9 +42,10 @@ interface Alert {
 interface ScheduleData {
   date: string;
   operators: any[];
-  rooms: ExamRoom[];
+  rooms: any[];
   day: string;
   time: string;
+  id: string;
 }
 
 interface AlertProps {
@@ -78,13 +69,42 @@ const OperatorDashboard: React.FC = () => {
   const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [isFetchingAlerts, setIsFetchingAlerts] = useState<boolean>(false);
   const [scheduleData, setScheduleData] = useState<ScheduleData>({
     date: "",
     operators: [],
     rooms: [],
     day: "",
     time: "",
+    id: "",
   });
+
+  const fetchAlerts = async () => {
+    if (!user || !scheduleData?.id) return;
+    try {
+      const res = await axios.get(
+        `${baseUrl}/api/v1/alert/schedule-alerts/${scheduleData?.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        }
+      );
+      setAlerts(res.data?.alerts);
+    } catch (error: any) {
+      console.error("Error fetching schedule data:", error);
+      setAlertContent({
+        variant: "error",
+        message: error?.response?.data?.detail || "Something went wrong!",
+      });
+    } finally {
+      setIsFetchingAlerts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAlerts();
+  }, [user, scheduleData]);
 
   const getAllCameras = () => {
     const cameras: {
@@ -128,8 +148,8 @@ const OperatorDashboard: React.FC = () => {
   const cameras = getAllCameras();
   const filteredRooms =
     selectedRoom === "all"
-      ? scheduleData.rooms
-      : scheduleData.rooms.filter(
+      ? scheduleData?.rooms
+      : scheduleData?.rooms?.filter(
           (room: any) => room.room.name === selectedRoom
         );
 
@@ -138,8 +158,7 @@ const OperatorDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const res = await axios.get(
-        `${baseUrl}/api/v1/schedule/today/${user?.user?.id}
-`,
+        `${baseUrl}/api/v1/schedule/today/${user?.user?.id}`,
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -173,7 +192,7 @@ const OperatorDashboard: React.FC = () => {
     <div className="bg-gray-50 flex flex-col h-screen overflow-hidden">
       <OperatorTopBar cameras={cameras} />
 
-      {scheduleData.date ? (
+      {scheduleData?.date ? (
         <div className="flex-1 flex">
           <div className="flex-1 flex flex-col h-[calc(100vh-90px)] overflow-auto">
             <ControlsBar
@@ -203,6 +222,7 @@ const OperatorDashboard: React.FC = () => {
                       key={`${camera.roomId}-${idx}`}
                       url={camera.url}
                       roomName={camera.roomName}
+                      schedule_id={scheduleData?.id}
                       isActive={camera.active}
                       onFocus={() => {
                         setFocusedCamera(`${camera.roomId}-${idx}`);
@@ -257,7 +277,7 @@ const OperatorDashboard: React.FC = () => {
 
                       <div className="p-6">
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                          {room.camera_urls.map((url: any, idx:number) => {
+                          {room.camera_urls.map((url: any, idx: number) => {
                             const cameraName =
                               url.split("/").pop()?.replace("-", " ") ||
                               `Camera ${idx + 1}`;
@@ -265,6 +285,7 @@ const OperatorDashboard: React.FC = () => {
                               <CameraFeed
                                 key={idx}
                                 url={url}
+                                schedule_id={scheduleData?.id}
                                 roomName={room.room.name}
                                 isActive={room.active}
                                 onFocus={() => {
@@ -294,6 +315,7 @@ const OperatorDashboard: React.FC = () => {
                                 url={camera?.url}
                                 roomName={camera?.roomName}
                                 isActive={camera?.active}
+                                schedule_id={scheduleData?.id}
                                 isFocused={true}
                                 onFocus={() => {
                                   setFocusedCamera(cameraId);
@@ -318,6 +340,8 @@ const OperatorDashboard: React.FC = () => {
                 alertsPanelOpen={alertsPanelOpen}
                 alerts={alerts}
                 setAlertsPanelOpen={setAlertsPanelOpen}
+                setAlerts={setAlerts}
+                handleAlert={(alert: AlertProps) => setAlertContent(alert)}
               />
             </div>
           )}
@@ -329,6 +353,13 @@ const OperatorDashboard: React.FC = () => {
             You do not have any exams scheduled today.
           </div>
         </div>
+      )}
+
+      {alertContent && (
+        <Alert
+          variant={alertContent?.variant}
+          message={alertContent?.message}
+        />
       )}
     </div>
   );

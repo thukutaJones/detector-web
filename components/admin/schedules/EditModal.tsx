@@ -415,7 +415,7 @@ const EditModal = ({
       setIsEditing(true);
 
       await axios.put(
-        `http://localhost:8000/api/v1/schedule/${editData.id}`,
+        `${baseUrl}/api/v1/schedule/${editData.id}`,
         editData,
         {
           headers: {
