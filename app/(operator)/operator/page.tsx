@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Camera, AlertTriangle, Clock, BookOpen, Bell, X } from "lucide-react";
 import OperatorTopBar from "@/components/operator/OperatorTopBar";
 import CameraFeed from "@/components/operator/CameraFeed";
@@ -12,6 +12,7 @@ import ManagementLoading from "@/components/academicData/ManagementLoading";
 import axios from "axios";
 import { baseUrl } from "@/constants/baseUrl";
 import { Alert } from "@/components/Alert";
+import { io } from "socket.io-client";
 
 interface Course {
   name: string;
@@ -78,6 +79,20 @@ const OperatorDashboard: React.FC = () => {
     time: "",
     id: "",
   });
+
+  const socketRef = useRef<any>(null);
+
+  useEffect(() => {
+    const socket = io(baseUrl, {
+      transports: ["websocket"],
+      reconnectionAttempts: 3,
+    });
+    socketRef.current = socket;
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const fetchAlerts = async () => {
     if (!user || !scheduleData?.id) return;
@@ -186,7 +201,7 @@ const OperatorDashboard: React.FC = () => {
     fectScheduleData();
   }, [user]);
 
-  if (!user || isLoading) return <ManagementLoading />;
+  if (!user || isLoading || !socketRef.current) return <ManagementLoading />;
 
   return (
     <div className="bg-gray-50 flex flex-col h-screen overflow-hidden">
@@ -224,10 +239,15 @@ const OperatorDashboard: React.FC = () => {
                       roomName={camera.roomName}
                       schedule_id={scheduleData?.id}
                       isActive={camera.active}
+                      socket={socketRef?.current}
                       onFocus={() => {
                         setFocusedCamera(`${camera.roomId}-${idx}`);
                         setViewMode("single-focus");
                       }}
+                      setAlerts={setAlerts}
+                      handleAlert={(alert: AlertProps) =>
+                        setAlertContent(alert)
+                      }
                     />
                   ))}
                 </div>
@@ -286,12 +306,17 @@ const OperatorDashboard: React.FC = () => {
                                 key={idx}
                                 url={url}
                                 schedule_id={scheduleData?.id}
-                                roomName={room.room.name}
-                                isActive={room.active}
+                                roomName={room?.room?.name}
+                                socket={socketRef?.current}
+                                isActive={room?.active}
                                 onFocus={() => {
-                                  setFocusedCamera(`${room.id}-${idx}`);
+                                  setFocusedCamera(`${room?.id}-${idx}`);
                                   setViewMode("single-focus");
                                 }}
+                                setAlerts={setAlerts}
+                                handleAlert={(alert: AlertProps) =>
+                                  setAlertContent(alert)
+                                }
                               />
                             );
                           })}
@@ -317,10 +342,15 @@ const OperatorDashboard: React.FC = () => {
                                 isActive={camera?.active}
                                 schedule_id={scheduleData?.id}
                                 isFocused={true}
+                                socket={socketRef?.current}
                                 onFocus={() => {
                                   setFocusedCamera(cameraId);
                                   setViewMode("single-focus");
                                 }}
+                                setAlerts={setAlerts}
+                                handleAlert={(alert: AlertProps) =>
+                                  setAlertContent(alert)
+                                }
                               />
                             </div>
                           </div>
@@ -338,10 +368,9 @@ const OperatorDashboard: React.FC = () => {
             <div className="w-80 border-l border-gray-200 bg-gray-50">
               <AlertsPanel
                 alertsPanelOpen={alertsPanelOpen}
+                socket={socketRef?.current}
                 alerts={alerts}
                 setAlertsPanelOpen={setAlertsPanelOpen}
-                setAlerts={setAlerts}
-                handleAlert={(alert: AlertProps) => setAlertContent(alert)}
               />
             </div>
           )}

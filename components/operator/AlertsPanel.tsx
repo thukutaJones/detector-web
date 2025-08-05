@@ -1,6 +1,4 @@
 import { baseUrl } from "@/constants/baseUrl";
-import { useEffect, useRef } from "react";
-import { io } from "socket.io-client";
 import { Bell, X, Zap, CheckCircle, Camera } from "lucide-react";
 import React, { useState } from "react";
 
@@ -17,20 +15,15 @@ interface Alert {
   created: string;
   updated: string;
   id: string;
+  room: string;
+  decision: string;
 }
 
 interface AlertsPanelProps {
   alertsPanelOpen: boolean;
   alerts: any[];
   setAlertsPanelOpen: (open: boolean) => void;
-  setAlerts: any;
-  handleAlert: ({
-    variant,
-    message,
-  }: {
-    variant: "info" | "error" | "success";
-    message: string;
-  }) => void;
+  socket: any;
 }
 
 type Severity = "high" | "medium" | "low";
@@ -38,17 +31,16 @@ type Severity = "high" | "medium" | "low";
 const AlertsPanel: React.FC<AlertsPanelProps> = ({
   alertsPanelOpen,
   alerts,
-  setAlerts,
   setAlertsPanelOpen,
-  handleAlert,
+  socket,
 }) => {
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [reviewModalOpen, setReviewModalOpen] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [hasError, setHasError] = useState<boolean>(false);
-  const socketRef = useRef<any>(null);
+  const [nudgeLoading, setNudgeLoading] = useState<boolean>(false);
+  const [nudgeSuccess, setNudgeSuccess] = useState<boolean>(false);
 
-  // Helper function to format timestamp
   const formatTime = (timestamp: string): string => {
     const year = timestamp.slice(0, 4);
     const month = timestamp.slice(4, 6);
@@ -59,13 +51,11 @@ const AlertsPanel: React.FC<AlertsPanelProps> = ({
     return `${hour}:${minute}`;
   };
 
-  // Helper function to extract track number from message
   const getTrackInfo = (message: string): string => {
     const match = message.match(/Track (\d+)/);
     return match ? `Track ${match[1]}` : "Unknown Track";
   };
 
-  // Helper function to determine severity
   const getSeverity = (alert: Alert): Severity => {
     const trackMatch = alert.message.match(/Track (\d+)/);
     const trackNumber = trackMatch ? parseInt(trackMatch[1]) : 0;
@@ -87,7 +77,7 @@ const AlertsPanel: React.FC<AlertsPanelProps> = ({
 
   const closeReviewModal = (): void => {
     setReviewModalOpen(false);
-    setSelectedAlert(null); 
+    setSelectedAlert(null);
     setCurrentImageIndex(0);
   };
 
@@ -103,65 +93,37 @@ const AlertsPanel: React.FC<AlertsPanelProps> = ({
     }
   };
 
-  const handleNudge = (): void => {
-    console.log("Nudge sent to security team!");
+  const handleNudge = async (room: string, alertId: string) => {
+    if (!room || !alertId) {
+      console.warn("Missing room or alertId");
+      return;
+    }
+
+    if (!socket?.connected) {
+      console.warn("Socket not connected");
+      return;
+    }
+
+    try {
+      setNudgeLoading(true);
+      setNudgeSuccess(false);
+
+      // Emit the nudge
+      socket.emit("nudge", { room, alertId });
+
+      // Simulate optimistic UI or use callback/ack if implemented on server
+      setTimeout(() => {
+        setNudgeSuccess(true);
+        setNudgeLoading(false);
+
+        // Auto-hide success indicator after 2s
+        setTimeout(() => setNudgeSuccess(false), 2000);
+      }, 500);
+    } catch (error) {
+      console.error("Failed to send nudge:", error);
+      setNudgeLoading(false);
+    }
   };
-
-  const handleMarkReviewed = (): void => {
-    alert("Marked as reviewed!");
-    closeReviewModal();
-  };
-
-  useEffect(() => {
-    const socket = io(baseUrl, {
-      transports: ["websocket"],
-      reconnectionAttempts: 3,
-    });
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      console.log("connected");
-      handleAlert({
-        variant: "success",
-        message: "Connected to socket server",
-      });
-    });
-
-    socket.on("suspicious_alert", (newAlert: any) => {
-      console.log("new alert");
-
-      handleAlert({
-        variant: "info",
-        message: "New alert received",
-      });
-      console.log("New alert received:", newAlert);
-      // setAlerts((prevAlerts: any[]) => [newAlert, ...prevAlerts]);
-    });
-
-    socket.on("connect_error", () => {
-      console.log("error");
-
-      handleAlert({
-        variant: "error",
-        message: "Faield to connect to socket server",
-      });
-      // setHasError(true);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("disconnected");
-
-      handleAlert({
-        variant: "error",
-        message: "socket server disconnected",
-      });
-      // setHasError(true);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
   return (
     <>
@@ -202,37 +164,83 @@ const AlertsPanel: React.FC<AlertsPanelProps> = ({
             return (
               <div
                 key={alert.id}
-                className="px-6 py-4 border-b border-gray-50 hover:bg-gray-50/80 transition-colors"
+                className="px-6 py-4 border-b border-gray-100 hover:bg-white transition-colors group"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  {/* Left Content */}
+                  <div className="flex items-start gap-4">
+                    {/* Status/Decision Dot */}
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        severity === "high"
+                      className={`w-3 h-3 mt-1.5 rounded-full ${
+                        alert.status === "pending"
+                          ? "bg-yellow-400"
+                          : alert.status === "reviewed" &&
+                            alert.decision === "cheating"
                           ? "bg-red-500"
-                          : severity === "medium"
-                          ? "bg-yellow-500"
-                          : "bg-blue-500"
+                          : alert.status === "reviewed" &&
+                            alert.decision === "normal"
+                          ? "bg-green-500"
+                          : "bg-gray-300"
                       }`}
                     />
-                    <div>
+
+                    {/* Alert Info */}
+                    <div className="flex flex-col text-sm gap-1.5">
+                      {/* Track Info + Timestamp */}
                       <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-medium text-gray-900">
+                        <h4 className="font-semibold text-gray-900 leading-tight">
                           {getTrackInfo(alert.message)}
                         </h4>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-400">
                           {formatTime(alert.timestamp)}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-600 mt-0.5">
-                        {alert.title}
+
+                      {/* Alert Title */}
+                      <p className="text-xs text-gray-600">{alert.title}</p>
+
+                      {/* Room Info */}
+                      <p className="text-xs text-gray-400 font-medium">
+                        Room: {alert.room}
                       </p>
+
+                      {/* Status & Decision Badges */}
+                      <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                        {/* Status Badge */}
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${
+                            alert.status === "reviewed"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {alert.status}
+                        </span>
+
+                        {/* Decision Badge */}
+                        {alert.status === "reviewed" &&
+                          alert.decision === "cheating" && (
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-semibold capitalize">
+                              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                              Cheating
+                            </span>
+                          )}
+
+                        {alert.status === "reviewed" &&
+                          alert.decision === "normal" && (
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold capitalize">
+                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                              Normal
+                            </span>
+                          )}
+                      </div>
                     </div>
                   </div>
 
+                  {/* Review Button */}
                   <button
                     onClick={() => openReviewModal(alert)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+                    className="text-green-600 hover:text-green-700 text-sm font-semibold transition-colors hover:underline"
                     type="button"
                   >
                     Check
@@ -339,12 +347,50 @@ const AlertsPanel: React.FC<AlertsPanelProps> = ({
               <div className="flex justify-end">
                 <div className="flex gap-3">
                   <button
-                    onClick={handleNudge}
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
+                    onClick={() =>
+                      handleNudge(selectedAlert?.room, selectedAlert?.id)
+                    }
+                    disabled={nudgeLoading}
+                    className={`${
+                      nudgeLoading ? "opacity-70 cursor-not-allowed" : ""
+                    } bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2`}
                     type="button"
                   >
-                    <Zap className="h-4 w-4" />
-                    Nudge
+                    {nudgeLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8H4z"
+                          />
+                        </svg>
+                        Sending...
+                      </>
+                    ) : nudgeSuccess ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 text-white" />
+                        Sent
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="h-4 w-4" />
+                        Nudge
+                      </>
+                    )}
                   </button>
 
                   <button

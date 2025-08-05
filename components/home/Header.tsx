@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import React, { useState } from "react";
 
@@ -15,13 +15,14 @@ const navItems = [
 
 const Header = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+    <header className="h-[70px] z-50 bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -60,7 +61,7 @@ const Header = () => {
           {/* CTA Button */}
           <div className="hidden md:block">
             <button
-              onClick={() => (location.href = "/sign-up")}
+              onClick={() => router.push("/claim-account")}
               className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition"
             >
               Get Started
@@ -69,7 +70,11 @@ const Header = () => {
 
           {/* Hamburger Button */}
           <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-gray-700 hover:text-green-600">
+            <button
+              onClick={toggleMenu}
+              className="text-gray-700 hover:text-green-600"
+              aria-label="Toggle Menu"
+            >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -78,14 +83,14 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 shadow-md">
-          <div className="flex flex-col px-4 py-4 space-y-3">
+        <div className="md:hidden absolute top-[70px] left-0 right-0 bg-white border-t shadow-md z-50">
+          <div className="flex flex-col px-4 py-4 space-y-4">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 href={item.path}
                 onClick={closeMenu}
-                className={`text-base font-medium transition-colors ${
+                className={`text-base font-medium ${
                   pathname === item.path
                     ? "text-green-600"
                     : "text-gray-700 hover:text-green-600"
@@ -97,9 +102,9 @@ const Header = () => {
             <button
               onClick={() => {
                 closeMenu();
-                location.href = "/sign-up";
+                router.push("/claim-account");
               }}
-              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition mt-2"
+              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition"
             >
               Get Started
             </button>

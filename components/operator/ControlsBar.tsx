@@ -82,7 +82,7 @@ const ControlsBar = ({
               <Rows3 className="h-4 w-4" />
             </button>
             <button
-              onClick={() => setViewMode("single-focus")}
+              disabled={true}
               className={`px-3 py-1 rounded-md text-sm transition-colors ${
                 viewMode === "single-focus"
                   ? "bg-white text-gray-900 shadow-sm"

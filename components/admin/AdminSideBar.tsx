@@ -49,7 +49,7 @@ type MenuKey =
 const AdminSideBar = () => {
   const user = useAuth(["admin"]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [userData, setUserData] = useState<any>({});
 
@@ -230,7 +230,7 @@ const AdminSideBar = () => {
       {/* Sidebar */}
       <div
         className={`
-          fixed md:relative top-0 left-0 h-full bg-white transition-all duration-500 ease-in-out
+          fixed md:relative top-0 z-20 left-0 h-full bg-white transition-all duration-500 ease-in-out
           ${
             isMobile
               ? sidebarOpen
@@ -386,7 +386,8 @@ const AdminSideBar = () => {
           </nav>
 
           <div className="p-4 border-t border-gray-100/50">
-            <button
+            <Link
+              href="/admin/profile"
               className={`w-full flex items-center ${
                 isExpanded ? "space-x-4" : "justify-center"
               } p-4 rounded-xl hover:bg-gray-100 transition-all duration-300`}
@@ -409,7 +410,7 @@ const AdminSideBar = () => {
                   </p>
                 </div>
               )}
-            </button>
+            </Link>
           </div>
         </div>
       </div>

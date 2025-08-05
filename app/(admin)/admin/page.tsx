@@ -54,15 +54,16 @@ const Dashboard = () => {
   if (!user || isLoading) return <ManagementLoading />;
 
   return (
-    <div className="flex-1 flex flex-col h-screen">
+    <div className="flex-1 flex flex-col h-screen scroll-container">
       <DashboardTopBar name={stats?.user?.fullName} />
-      <main className="flex-1 overflow-auto bg-transparent">
+      <main className="flex-1 overflow-auto bg-transparent scroll-container">
         <div className="p-8 space-y-8">
           <StatsGrid
             stats={{
               total_users: stats?.total_users,
               active_users: stats?.active_users,
               inactive_users: stats?.inactive_users,
+              detection_accuracy: stats?.detection_accuracy
             }}
           />
           <ContentGrid

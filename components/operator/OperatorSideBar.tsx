@@ -84,12 +84,12 @@ const OperatorSideBar = () => {
         {
           title: "My Schedules",
           icon: Clock3,
-          route: "/schedules",
+          route: "/operator/schedules",
         },
         {
           title: "My Past Schedules",
           icon: Clock3,
-          route: "/past-schedules",
+          route: "/operator/past-schedules",
         },
       ],
     },
@@ -291,7 +291,8 @@ const OperatorSideBar = () => {
           </nav>
 
           <div className="p-4 border-t border-gray-100/50">
-            <button
+            <Link
+              href={"/operator/profile"}
               className={`w-full flex items-center ${
                 isExpanded ? "space-x-4" : "justify-center"
               } p-4 rounded-xl hover:bg-gray-100 transition-all duration-300`}
@@ -314,7 +315,7 @@ const OperatorSideBar = () => {
                   </p>
                 </div>
               )}
-            </button>
+            </Link>
           </div>
         </div>
       </div>

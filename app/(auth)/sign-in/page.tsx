@@ -17,6 +17,7 @@ import Image from "next/image";
 import axios from "axios";
 import { baseUrl } from "@/constants/baseUrl";
 import { decodeToken } from "@/utils/decodeToken";
+import { useRouter } from "next/navigation";
 
 const DetectorLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +31,8 @@ const DetectorLogin: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const mousePositionRef = useRef({ x: 0, y: 0 });
+
+  const router = useRouter();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -60,12 +63,12 @@ const DetectorLogin: React.FC = () => {
       localStorage.setItem("token", res.data?.token);
       const decoded: any = await decodeToken(res?.data?.token);
       console.log(decoded);
-      if (decoded?.user?.role === "admin") {
-        window.location.href = "/admin";
+       if (decoded?.user?.role === "admin") {
+        router.replace("/admin");
         return;
       }
       if (decoded?.user?.role === "operator") {
-        window.location.href = "/operator";
+        router.replace("/operator");
         return;
       }
       if (decoded?.user?.role === "invigilator") {
@@ -140,12 +143,13 @@ const DetectorLogin: React.FC = () => {
       });
 
       localStorage.setItem("token", res.data?.token);
-      if (res.data?.user?.role === "admin") {
-        location.href = "/admin";
+      const decoded: any = await decodeToken(res?.data?.token)
+      if (decoded?.user?.role === "admin") {
+        router.replace("/admin");
         return;
       }
-      if (res.data?.user?.role === "operator") {
-        location.href = "/operator";
+      if (decoded?.user?.role === "operator") {
+        router.replace("/operator");
         return;
       }
 
@@ -168,7 +172,7 @@ const DetectorLogin: React.FC = () => {
         {!showOTP ? (
           <div className="w-full flex flex-col md:flex-row items-center justify-center gap-8">
             {/* Branding / Left Column */}
-            <div className="text-center animate-fade-in md:px-16">
+            <div className="text-center animated fadeInUp md:px-16">
               <div className="relative inline-block">
                 <div className="w-20 h-20 p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl transform hover:scale-105 transition-all duration-300">
                   <Image
@@ -204,7 +208,7 @@ const DetectorLogin: React.FC = () => {
             </div>
 
             {/* Login Form / Right Column */}
-            <div className="bg-white/80 w-full max-w-md backdrop-blur-xl rounded-3xl shadow-2xl p-8 transform hover:scale-[1.02] transition-all duration-300">
+            <div className="bg-white/80 animated fadeInRight w-full max-w-md backdrop-blur-xl rounded-3xl shadow-2xl p-8 transform hover:scale-[1.02] transition-all duration-300">
               <form className="space-y-6" onSubmit={handleLogin}>
                 {!!formError && (
                   <div className="bg-red-900/10 p-4 rounded-xl">
@@ -303,9 +307,12 @@ const DetectorLogin: React.FC = () => {
                 </button>
               </form>
               <p className="text-center text-gray-600 mt-8">
-                Don’t have an account?{" "}
-                <button className="text-green-600 hover:text-green-700 font-semibold transition-colors">
-                  Sign up
+                Account not verified?{" "}
+                <button
+                  className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+                  onClick={() => router.push("/claim-account")}
+                >
+                  Claim Account
                 </button>
               </p>
             </div>

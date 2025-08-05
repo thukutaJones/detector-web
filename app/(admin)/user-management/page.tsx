@@ -163,7 +163,7 @@ const UserManagement = () => {
   if (!user || isLoading) return <ManagementLoading context="users" />;
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden min-h-screen bg-gray-50">
+    <div className="flex-1 flex flex-col overflow-hidden min-h-screen bg-white">
       <div className="w-full h-[190px]">
         <UserMngTopBar setShowAddModal={setShowAddModal} />
         <FilterAndSearch

@@ -125,7 +125,7 @@ const ContactUsPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white mt-10">
+    <div className="min-h-screen bg-white">
       {/* Header Section */}
       <div className="relative bg-white overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-transparent"></div>

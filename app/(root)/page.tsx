@@ -9,9 +9,9 @@ import Footer from '@/components/home/Footer';
 
 const DetectorHomepage = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white h-[calc(100vh-70px)] overflow-auto scroll-container">
       <HeroSection />
-      <StatsSection />
+      {/* <StatsSection /> */}
       <FeaturesSection />
       <HowItWorks />
       <CTASection />

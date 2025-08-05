@@ -35,7 +35,7 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white mt-10">
+    <div className="min-h-screen bg-white">
      
       
       <div className="max-w-7xl mx-auto px-8">

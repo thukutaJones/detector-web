@@ -198,7 +198,7 @@ const SchedulesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50">
+    <div className="min-h-screen bg-white">
       <SchedulesTopBar fileInputRef={fileInputRef} callBack={fetchSchedules} />
       <Content
         schedules={schedules}

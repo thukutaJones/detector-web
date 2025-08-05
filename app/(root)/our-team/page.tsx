@@ -53,7 +53,7 @@ const TeamPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white mt-10">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-8">
         {/* Header */}
         <div className="text-center py-24 opacity-0 animate-fade-in-up">

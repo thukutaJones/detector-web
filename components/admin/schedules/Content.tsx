@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import {
   Building2,
   Calendar,
@@ -25,39 +26,58 @@ const Content = ({
   handleDelete,
 }: {
   schedules: any[];
-  fileInputRef: any;
-  startEdit: any;
-  handleDelete: any;
+  fileInputRef?: any;
+  startEdit?: any;
+  handleDelete?: any;
 }) => {
+  const user = useAuth(["admin", "operator"]);
   const [expandedSchedule, setExpandedSchedule] = useState<string | null>(null);
 
   return (
     <div className="relative px-4 py-4 h-[calc(100vh-100px)] overflow-auto scroll-container">
       {schedules.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="relative inline-block">
-            <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <FileSpreadsheet className="h-12 w-12 text-green-600" />
+        <>
+          {user?.user?.role === "admin" ? (
+            <div className="text-center py-20">
+              <div className="relative inline-block">
+                <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <FileSpreadsheet className="h-12 w-12 text-green-600" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                  <Plus className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                No schedules found
+              </h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                Get started by uploading your first Excel schedule file to begin
+                monitoring exams
+              </p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                <Upload className="h-5 w-5 mr-2" />
+                Upload Your First Schedule
+              </button>
             </div>
-            <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <Plus className="w-4 h-4 text-white" />
+          ) : (
+            <div className="text-center py-20">
+              <div className="relative inline-block">
+                <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <FileSpreadsheet className="h-12 w-12 text-green-600" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                No schedules found
+              </h3>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                When you have been assigned to a schudule it will appear here
+              </p>
             </div>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">
-            No schedules found
-          </h3>
-          <p className="text-gray-600 mb-8 max-w-md mx-auto">
-            Get started by uploading your first Excel schedule file to begin
-            monitoring exams
-          </p>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-          >
-            <Upload className="h-5 w-5 mr-2" />
-            Upload Your First Schedule
-          </button>
-        </div>
+          )}
+        </>
       ) : (
         <div className="grid gap-4">
           {schedules.map((schedule, index) => (
@@ -130,18 +150,22 @@ const Content = ({
                         <Eye className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                       )}
                     </button>
-                    <button
-                      onClick={() => startEdit(schedule)}
-                      className="p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 group"
-                    >
-                      <Edit3 className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(schedule.id)}
-                      className="p-3 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
-                    >
-                      <Trash2 className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
-                    </button>
+                    {user?.user?.role === "admin" && (
+                      <>
+                        <button
+                          onClick={() => startEdit(schedule)}
+                          className="p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 group"
+                        >
+                          <Edit3 className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(schedule.id)}
+                          className="p-3 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
+                        >
+                          <Trash2 className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -234,14 +258,16 @@ const Content = ({
                                 </span>
                               </div>
                               <div className="flex flex-wrap gap-2">
-                                {room.invigilators.map((invigilator: any, index: number) => (
-                                  <span
-                                    key={index?.toString()}
-                                    className="bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium"
-                                  >
-                                    {invigilator.fullName}
-                                  </span>
-                                ))}
+                                {room.invigilators.map(
+                                  (invigilator: any, index: number) => (
+                                    <span
+                                      key={index?.toString()}
+                                      className="bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium"
+                                    >
+                                      {invigilator.fullName}
+                                    </span>
+                                  )
+                                )}
                               </div>
                             </div>
 
@@ -253,17 +279,19 @@ const Content = ({
                                   Cameras ({room.camera_urls.length})
                                 </span>
                               </div>
-                              {room.camera_urls.map((url: any, urlIndex: number) => (
-                                <div
-                                  key={urlIndex?.toString()}
-                                  className="flex items-center bg-red-50 rounded-lg p-2 mb-1"
-                                >
-                                  <VideoIcon className="h-3 w-3 text-red-500 mr-2 flex-shrink-0" />
-                                  <span className="text-red-700 text-xs truncate">
-                                    {url}
-                                  </span>
-                                </div>
-                              ))}
+                              {room.camera_urls.map(
+                                (url: any, urlIndex: number) => (
+                                  <div
+                                    key={urlIndex?.toString()}
+                                    className="flex items-center bg-red-50 rounded-lg p-2 mb-1"
+                                  >
+                                    <VideoIcon className="h-3 w-3 text-red-500 mr-2 flex-shrink-0" />
+                                    <span className="text-red-700 text-xs truncate">
+                                      {url}
+                                    </span>
+                                  </div>
+                                )
+                              )}
                             </div>
                           </div>
                         </div>

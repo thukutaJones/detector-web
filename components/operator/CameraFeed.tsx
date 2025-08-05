@@ -10,6 +10,15 @@ interface CameraFeedProps {
   isFocused?: boolean;
   onFocus?: () => void;
   schedule_id: string;
+  setAlerts: any;
+  socket: any;
+  handleAlert: ({
+    variant,
+    message,
+  }: {
+    variant: "info" | "error" | "success";
+    message: string;
+  }) => void;
 }
 
 const CameraFeed: React.FC<CameraFeedProps> = ({
@@ -18,12 +27,15 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
   isActive,
   isFocused = false,
   onFocus,
-  schedule_id
+  schedule_id,
+  setAlerts,
+  handleAlert,
+  socket
 }) => {
   const [timestamp, setTimestamp] = useState(new Date().toLocaleTimeString());
   const [imageData, setImageData] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
-  const socketRef = useRef<any>(null);
+  // const socketRef = useRef<any>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -37,40 +49,59 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
   }, []);
 
   useEffect(() => {
-    const socket = io(baseUrl, {
-      transports: ["websocket"],
-      reconnectionAttempts: 3,
-    });
-    socketRef.current = socket;
+  if (!socket) return;
 
-    socket.on("connect", () => {
-      socket.emit("start_stream", {
-        url,
-        room: roomName,
-        method: "Network camera",
-        schedule_id: schedule_id,
-      });
-    });
+  console.log("connected");
 
-    socket.on("stream_frame", (data) => {
-      if (data.room === roomName && data.image) {
-        setImageData(`data:image/jpeg;base64,${data.image}`);
-        setHasError(false);
-      }
-    });
+  socket.emit("start_stream", {
+    url,
+    room: roomName,
+    method: "Network camera",
+    schedule_id: schedule_id,
+  });
 
-    socket.on("connect_error", () => {
-      setHasError(true);
-    });
+  const handleFrame = (data: any) => {
+    if (data.room === roomName && data.image) {
+      setImageData(`data:image/jpeg;base64,${data.image}`);
+      setHasError(false);
+    }
+  };
 
-    socket.on("disconnect", () => {
-      setHasError(true);
+  const handleSuspiciousAlert = (newAlert: any) => {
+    console.log("New alert received:", newAlert);
+
+    handleAlert({
+      variant: "info",
+      message: "New alert received",
     });
 
-    return () => {
-      socket.disconnect();
-    };
-  }, [roomName, url]); 
+    setAlerts((prevAlerts: any[]) => [newAlert, ...prevAlerts]);
+  };
+
+  const handleConnectError = () => {
+    setHasError(true);
+    console.log("Socket connection error");
+  };
+
+  const handleDisconnect = () => {
+    console.log("Socket disconnected");
+    setHasError(true);
+  };
+
+  socket.on("stream_frame", handleFrame);
+  socket.on("suspicious_alert", handleSuspiciousAlert);
+  socket.on("connect_error", handleConnectError);
+  socket.on("disconnect", handleDisconnect);
+
+  return () => {
+    // Remove only the listeners, do NOT disconnect unless this is the ONLY component using the socket
+    socket.off("stream_frame", handleFrame);
+    socket.off("suspicious_alert", handleSuspiciousAlert);
+    socket.off("connect_error", handleConnectError);
+    socket.off("disconnect", handleDisconnect);
+  };
+}, [roomName, url, socket, schedule_id]);
+
 
   return (
     <div
@@ -91,7 +122,7 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
         />
       ) : (
         <img
-          src={imageData|| '/videoFeedError1.jpg'}
+          src={imageData || "/videoFeedError1.jpg"}
           alt={`Stream from ${roomName}`}
           className="w-full h-full object-cover"
         />

@@ -21,7 +21,7 @@ const FilterAndSearch = ({
   searchTerm: any;
 }) => {
   return (
-    <div className="bg-white border-b border-gray-200 px-8 py-4">
+    <div className="bg-white px-8 py-4">
       <div className="flex items-center space-x-4">
         <div className="relative">
           <button

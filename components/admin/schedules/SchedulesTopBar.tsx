@@ -8,10 +8,10 @@ const SchedulesTopBar = ({
   fileInputRef,
   callBack,
 }: {
-  fileInputRef: any;
+  fileInputRef?: any;
   callBack: any;
 }) => {
-  const user = useAuth(["admin"]);
+  const user = useAuth(["admin", "operator"]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -58,7 +58,7 @@ const SchedulesTopBar = ({
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 px-8 py-6 h-[100px]">
+    <div className="bg-white px-8 py-6 h-[100px]">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Exam Schedules</h1>
@@ -66,40 +66,42 @@ const SchedulesTopBar = ({
             AI-powered exam monitoring & academic integrity
           </p>
         </div>
-        <div className="relative">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {uploading ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Uploading... {uploadProgress}%
-              </>
-            ) : (
-              <>
-                <Upload className="w-5 h-5 mr-2" />
-                <span className="hidden md:block text-sm font-semibold">
-                  Upload Schedule
-                </span>
-              </>
-            )}
-          </button>
-          {uploading && (
-            <div
-              className="absolute bottom-0 left-0 h-1 bg-green-300 rounded-full transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
+        {user?.user?.role === "admin" && (
+          <div className="relative">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileUpload}
+              className="hidden"
             />
-          )}
-        </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="inline-flex items-center px-8 py-3 bg-green-600 text-white font-medium rounded-full hover:bg-green-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Uploading... {uploadProgress}%
+                </>
+              ) : (
+                <>
+                  <Upload className="w-5 h-5 mr-2" />
+                  <span className="hidden md:block text-sm font-semibold">
+                    Upload Schedule
+                  </span>
+                </>
+              )}
+            </button>
+            {uploading && (
+              <div
+                className="absolute bottom-0 left-0 h-1 bg-green-300 rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
