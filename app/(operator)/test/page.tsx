@@ -10,7 +10,6 @@ export default function AlertSocket() {
 
     socket.onmessage = (event) => {
       setAlerts((prev) => [...prev, event.data]);
-      console.log("New alert received:", event.data);
     };
 
     return () => socket.close();

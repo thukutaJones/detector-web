@@ -8,7 +8,6 @@ export async function decodeToken(token: string) {
   }
   try {
     const decoded = jwt.decode(token);
-    console.log(decoded);
     return decoded;
   } catch (error) {
     return null;

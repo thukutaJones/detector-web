@@ -70,11 +70,8 @@ const DetectorLogin: React.FC = () => {
         password: password?.comfirmPassword,
       });
 
-      console.log(res?.data);
-
       localStorage.setItem("token", res.data?.token);
       const decoded: any = await decodeToken(res?.data?.token);
-      console.log(decoded);
       if (decoded?.user?.role === "admin") {
         window.location.href = "/admin";
         return;

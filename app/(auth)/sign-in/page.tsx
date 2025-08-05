@@ -62,8 +62,7 @@ const DetectorLogin: React.FC = () => {
 
       localStorage.setItem("token", res.data?.token);
       const decoded: any = await decodeToken(res?.data?.token);
-      console.log(decoded);
-       if (decoded?.user?.role === "admin") {
+      if (decoded?.user?.role === "admin") {
         router.replace("/admin");
         return;
       }
@@ -143,7 +142,7 @@ const DetectorLogin: React.FC = () => {
       });
 
       localStorage.setItem("token", res.data?.token);
-      const decoded: any = await decodeToken(res?.data?.token)
+      const decoded: any = await decodeToken(res?.data?.token);
       if (decoded?.user?.role === "admin") {
         router.replace("/admin");
         return;
