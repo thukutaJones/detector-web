@@ -8,9 +8,13 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animated fadeInUp">
             <div className="space-y-6">
-              <div className="inline-flex items-center bg-green-50 px-6 py-3 rounded-full border border-green-200">
-                <Award className="w-5 h-5 text-green-600 mr-3" />
-                <span className="text-green-800 text-sm font-medium">
+              <div className="inline-flex items-center gap-3 bg-green-50 px-5 py-3 rounded-full border border-green-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <img
+                  src="/ictMzuni.png"
+                  alt="Mzuzu University Logo"
+                  className="h-7 w-7 object-contain"
+                />
+                <span className="text-green-800 text-sm font-semibold tracking-tight">
                   Proudly developed by Mzuzu University
                 </span>
               </div>
@@ -27,7 +31,7 @@ const HeroSection = () => {
               </p>
             </div>
 
-            <div className="flex flex-col w-full justify-end sm:flex-row gap-4">
+            <div className="flex flex-col w-full items-center justify-center md:justify-end sm:flex-row gap-8">
               <button
                 className="bg-green-600 text-white px-20 py-3 rounded-full hover:bg-green-700 transition-all transform hover:scale-105 font-medium text-lg shadow-lg"
                 onClick={() => (location.href = "/sign-in")}
@@ -43,7 +47,7 @@ const HeroSection = () => {
             <img
               src="/bg.jpg"
               alt="AI cheating detection"
-              className="w-full animated fadeInRight z-20 max-w-md lg:max-w-lg rounded-3xl shadow-2xl border-4 border-white object-cover transition-transform duration-500 hover:scale-105"
+              className="w-[85%] animated fadeInRight z-20 max-w-md lg:max-w-lg rounded-3xl shadow-2xl border-4 border-white object-cover transition-transform duration-500 hover:scale-105"
             />
           </div>
         </div>

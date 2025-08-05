@@ -16,7 +16,7 @@ const TeamPage = () => {
     },
     {
       name: "Mr. Wongan Mkandawire",
-      role: "Lecturer & Software Engineer",
+      role: "ICT Support & Software Engineer",
       department: "ICT Supervisor",
       bio: "",
       github: "#",

@@ -37,7 +37,7 @@ const Content = ({
     <div className="relative px-4 py-4 h-[calc(100vh-100px)] overflow-auto scroll-container">
       {schedules.length === 0 ? (
         <>
-          {user?.user?.role === "admin" ? (
+          {fileInputRef ? (
             <div className="text-center py-20">
               <div className="relative inline-block">
                 <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
@@ -150,7 +150,7 @@ const Content = ({
                         <Eye className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                       )}
                     </button>
-                    {user?.user?.role === "admin" && (
+                    {fileInputRef && (
                       <>
                         <button
                           onClick={() => startEdit(schedule)}

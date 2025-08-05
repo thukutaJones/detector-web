@@ -85,12 +85,7 @@ const OperatorSideBar = () => {
           title: "My Schedules",
           icon: Clock3,
           route: "/operator/schedules",
-        },
-        {
-          title: "My Past Schedules",
-          icon: Clock3,
-          route: "/operator/past-schedules",
-        },
+        }
       ],
     },
   ] as const;

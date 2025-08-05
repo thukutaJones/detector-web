@@ -7,9 +7,11 @@ import React, { useState } from "react";
 const SchedulesTopBar = ({
   fileInputRef,
   callBack,
+  title = "Schedules",
 }: {
   fileInputRef?: any;
   callBack: any;
+  title?: string;
 }) => {
   const user = useAuth(["admin", "operator"]);
   const [uploading, setUploading] = useState(false);
@@ -61,12 +63,12 @@ const SchedulesTopBar = ({
     <div className="bg-white px-8 py-6 h-[100px]">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Exam Schedules</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
           <p className="mt-2 text-gray-600 text-sm">
             AI-powered exam monitoring & academic integrity
           </p>
         </div>
-        {user?.user?.role === "admin" && (
+        {fileInputRef && (
           <div className="relative">
             <input
               ref={fileInputRef}

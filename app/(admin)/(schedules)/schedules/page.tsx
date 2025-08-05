@@ -171,12 +171,12 @@ const SchedulesPage: React.FC = () => {
     if (!user) return;
     try {
       setLoading(true);
-      const res = await axios.get(`${baseUrl}/api/v1/schedule`, {
+      const res = await axios.get(`${baseUrl}/api/v1/schedule/present-future/all`, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
         },
       });
-      setSchedules(res.data?.schedules);
+      setSchedules(res.data?.schedules || []);
     } catch (error: any) {
       setAlertContent({
         variant: "error",

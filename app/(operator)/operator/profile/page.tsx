@@ -77,14 +77,14 @@ const page = () => {
 
   if (isLoading || !user) return <ManagementLoading />;
   return (
-    <div className="w-full">
+    <div className="h-screen flex-1 overflow-hidden">
       <TopBar
         handleLogOut={() => {
           localStorage.removeItem("token");
           router.replace("/sign-in");
         }}
       />
-      <div className="relative p-8">
+      <div className="relative p-8 h-[calc(100vh-80px)] overflow-auto scroll-container bg-white">
         {/* Profile Header */}
         <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8 mb-8">
           {/* Avatar Section */}

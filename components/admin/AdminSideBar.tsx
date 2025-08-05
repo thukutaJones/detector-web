@@ -6,6 +6,7 @@ import {
   Users,
   BarChart3,
   Menu,
+  FolderSearch,
   X,
   ChevronDown,
   ChevronRight,
@@ -30,6 +31,7 @@ import {
   HomeIcon,
   CalendarClock,
   Clock3,
+  Folder,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,7 +46,8 @@ type MenuKey =
   | "scheduleManagement"
   | "analytics"
   | "systemData"
-  | "academicData";
+  | "academicData"
+  | "evidences";
 
 const AdminSideBar = () => {
   const user = useAuth(["admin"]);
@@ -60,6 +63,7 @@ const AdminSideBar = () => {
     analytics: false,
     systemData: false,
     academicData: false,
+    evidences: false,
   });
 
   useEffect(() => {
@@ -135,32 +139,24 @@ const AdminSideBar = () => {
       gradient: "from-green-500 to-teal-600",
       children: [
         {
-          title: "User Analytics",
-          icon: TrendingUp,
-          route: "/analytics#user-analytics",
-        },
-        {
           title: "Detection Performance",
           icon: Activity,
           route: "/analytics#detection-performance",
         },
         {
-          title: "Exam Analytics",
-          icon: FileText,
-          route: "/analytics#exam-analytics",
+          title: "User Analytics",
+          icon: TrendingUp,
+          route: "/analytics#user-analytics",
         },
       ],
     },
-    // {
-    //   key: "academicData",
-    //   title: "Academic Data",
-    //   icon: BookOpenCheck,
-    //   gradient: "from-indigo-500 to-blue-700",
-    //   children: [
-    //     { title: "Courses", icon: Book, route: "/academic-data/courses" },
-    //     { title: "Rooms", icon: DoorOpen, route: "/academic-data/rooms" },
-    //   ],
-    // },
+    {
+      key: "evidences",
+      title: "Evidences",
+      icon: FolderSearch,
+      gradient: "from-indigo-500 to-blue-700",
+      children: [{ title: "Evidences", icon: Folder, route: "/evidences" }],
+    },
     {
       key: "systemData",
       title: "Content Management",
@@ -302,6 +298,7 @@ const AdminSideBar = () => {
                 "analytics",
                 "systemData",
                 "academicData",
+                "evidences"
               ].includes(item.key);
               return (
                 <div key={item.key} className="space-y-1">
@@ -340,6 +337,7 @@ const AdminSideBar = () => {
                       "analytics",
                       "systemData",
                       "academicData",
+                      "evidences"
                     ].includes(item.key)
                       ? expandedMenus[item.key as MenuKey]
                       : true) && (
