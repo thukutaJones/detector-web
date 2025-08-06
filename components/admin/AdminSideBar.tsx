@@ -166,22 +166,22 @@ const AdminSideBar = () => {
         {
           title: "Homepage Data",
           icon: Home,
-          route: "/system-data/home-page",
+          route: "#",
         },
         {
           title: "Our Team Data",
           icon: UserCheck,
-          route: "/system-data/our-team",
+          route: "#",
         },
         {
           title: "About Us Data",
           icon: Info,
-          route: "/system-data/about-us",
+          route: "#",
         },
         {
           title: "Contact Us Data",
           icon: Mail,
-          route: "/system-data/contact-us-data",
+          route: "#",
         },
       ],
     },
