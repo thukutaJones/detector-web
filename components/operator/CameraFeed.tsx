@@ -1,7 +1,5 @@
-import { baseUrl } from "@/constants/baseUrl";
 import { Maximize2 } from "lucide-react";
-import React, { useEffect, useState, useRef } from "react";
-import io from "socket.io-client";
+import React, { useEffect, useRef, useState } from "react";
 
 interface CameraFeedProps {
   url: string;
@@ -11,14 +9,11 @@ interface CameraFeedProps {
   onFocus?: () => void;
   schedule_id: string;
   setAlerts: any;
-  socket: any;
-  handleAlert: ({
-    variant,
-    message,
-  }: {
+  handleAlert: (args: {
     variant: "info" | "error" | "success";
     message: string;
   }) => void;
+  socket: any;
 }
 
 const CameraFeed: React.FC<CameraFeedProps> = ({
@@ -30,14 +25,16 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
   schedule_id,
   setAlerts,
   handleAlert,
-  socket
+  socket,
 }) => {
   const [timestamp, setTimestamp] = useState(new Date().toLocaleTimeString());
-  const [imageData, setImageData] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
-  // const socketRef = useRef<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastRenderTimeRef = useRef<number>(0);
+  const FRAME_INTERVAL = 100; // 10 FPS
 
+  // Update timestamp every second
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setTimestamp(new Date().toLocaleTimeString());
@@ -49,59 +46,70 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
   }, []);
 
   useEffect(() => {
-  if (!socket) return;
+    if (!socket) return;
 
-  console.log("connected");
-
-  socket.emit("start_stream", {
-    url,
-    room: roomName,
-    method: "Network camera",
-    schedule_id: schedule_id,
-  });
-
-  const handleFrame = (data: any) => {
-    if (data.room === roomName && data.image) {
-      setImageData(`data:image/jpeg;base64,${data.image}`);
-      setHasError(false);
-    }
-  };
-
-  const handleSuspiciousAlert = (newAlert: any) => {
-    console.log("New alert received:", newAlert);
-
-    handleAlert({
-      variant: "info",
-      message: "New alert received",
+    socket.emit("start_stream", {
+      url,
+      room: roomName,
+      method: "Network camera",
+      schedule_id,
     });
 
-    setAlerts((prevAlerts: any[]) => [newAlert, ...prevAlerts]);
-  };
+    const handleFrame = (data: any) => {
+      if (
+        data.room === roomName &&
+        data.image &&
+        Date.now() - lastRenderTimeRef.current >= FRAME_INTERVAL
+      ) {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-  const handleConnectError = () => {
-    setHasError(true);
-    console.log("Socket connection error");
-  };
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        img.onload = () => {
+          // Auto resize canvas to match image
+          if (canvas.width !== img.width) canvas.width = img.width;
+          if (canvas.height !== img.height) canvas.height = img.height;
+          ctx?.drawImage(img, 0, 0);
+          setHasError(false);
+        };
+        img.onerror = () => {
+          setHasError(true);
+        };
+        img.src = `data:image/jpeg;base64,${data.image}`;
+        lastRenderTimeRef.current = Date.now();
+      }
+    };
 
-  const handleDisconnect = () => {
-    console.log("Socket disconnected");
-    setHasError(true);
-  };
+    const handleSuspiciousAlert = (newAlert: any) => {
+      handleAlert({
+        variant: "info",
+        message: "New alert received",
+      });
 
-  socket.on("stream_frame", handleFrame);
-  socket.on("suspicious_alert", handleSuspiciousAlert);
-  socket.on("connect_error", handleConnectError);
-  socket.on("disconnect", handleDisconnect);
+      setAlerts((prev: any[]) => [newAlert, ...prev]);
+    };
 
-  return () => {
-    // Remove only the listeners, do NOT disconnect unless this is the ONLY component using the socket
-    socket.off("stream_frame", handleFrame);
-    socket.off("suspicious_alert", handleSuspiciousAlert);
-    socket.off("connect_error", handleConnectError);
-    socket.off("disconnect", handleDisconnect);
-  };
-}, [roomName, url, socket, schedule_id]);
+    const handleConnectError = () => {
+      setHasError(true);
+    };
 
+    const handleDisconnect = () => {
+      setHasError(true);
+    };
+
+    socket.on("stream_frame", handleFrame);
+    socket.on("suspicious_alert", handleSuspiciousAlert);
+    socket.on("connect_error", handleConnectError);
+    socket.on("disconnect", handleDisconnect);
+
+    return () => {
+      socket.off("stream_frame", handleFrame);
+      socket.off("suspicious_alert", handleSuspiciousAlert);
+      socket.off("connect_error", handleConnectError);
+      socket.off("disconnect", handleDisconnect);
+    };
+  }, [roomName, url, socket, schedule_id]);
 
   return (
     <div
@@ -109,23 +117,15 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
         isFocused ? "ring-2 ring-green-600 scale-[1.01]" : "hover:scale-[1.01]"
       }`}
     >
-      {/* Video feed display logic */}
-      {!imageData && !hasError ? (
-        <div className="flex justify-center items-center h-[30vh] text-gray-500 text-sm">
-          Loading stream...
-        </div>
-      ) : hasError ? (
+      {/* Video Canvas */}
+      {hasError ? (
         <img
           src="/videoFeedError1.jpg"
           alt="Stream Error"
           className="object-cover h-[30vh] w-full"
         />
       ) : (
-        <img
-          src={imageData || "/videoFeedError1.jpg"}
-          alt={`Stream from ${roomName}`}
-          className="w-full h-full object-cover"
-        />
+        <canvas ref={canvasRef} className="w-full h-full object-cover" />
       )}
 
       {/* Top status bar */}
@@ -141,7 +141,7 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
         </div>
       </div>
 
-      {/* Focus button overlay */}
+      {/* Focus button */}
       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/40 to-transparent">
         <div className="flex justify-end">
           {onFocus && (

@@ -181,11 +181,27 @@ const OperatorDashboard: React.FC = () => {
         }
       );
       console.log("Schedule data fetched:", res.data);
-      setScheduleData(
-        res.data
-          ? res.data?.schedules[0]
-          : { date: "", day: "", rooms: [], operators: [] }
-      );
+      const isAfternoon = (timeStr: any) => {
+        return timeStr.toLowerCase().includes("pm") ? 1 : 0;
+      };
+
+      const schedule = res.data?.schedules?.[0] || {
+        date: "",
+        day: "",
+        rooms: [],
+        operators: [],
+        time: "8-11 am",
+      };
+
+      const index = isAfternoon(schedule.time);
+      console.log("Chosen index:", index);
+
+      setScheduleData(schedule);
+      // setScheduleData(
+      //   res.data
+      //     ? res.data?.schedules[0]
+      //     : { date: "", day: "", rooms: [], operators: [] }
+      // );
     } catch (error: any) {
       console.error("Error fetching schedule data:", error);
       setAlertContent({
