@@ -213,7 +213,7 @@ const AdminSideBar = () => {
       {isMobile && (
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="fixed top-4 left-4 z-50 p-2 bg-white rounded-full shadow-lg md:hidden"
+          className="fixed top-4 left-4 z-40 p-2 bg-white rounded-full shadow-lg md:hidden"
         >
           {sidebarOpen ? (
             <X className="w-5 h-5 text-gray-600" />

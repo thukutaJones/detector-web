@@ -180,12 +180,12 @@ const OperatorDashboard: React.FC = () => {
           },
         }
       );
-      console.log("Schedule data fetched:", res.data);
+      console.log("Schedule data fetched:", res.data?.schedules[0]);
       const isAfternoon = (timeStr: any) => {
         return timeStr.toLowerCase().includes("pm") ? 1 : 0;
       };
 
-      const schedule = res.data?.schedules?.[0] || {
+      const schedule = res.data?.schedules[0] || {
         date: "",
         day: "",
         rooms: [],
