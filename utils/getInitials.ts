@@ -13,7 +13,7 @@ export const getInitials = (name: string = ""): string => {
 
     return (first + last).toUpperCase();
   } catch (error) {
-    console.error("Failed to extract initials:", error);
+    console.log("Failed to extract initials:", error);
     return "";
   }
 };

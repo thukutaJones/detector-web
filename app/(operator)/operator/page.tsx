@@ -107,7 +107,7 @@ const OperatorDashboard: React.FC = () => {
       );
       setAlerts(res.data?.alerts);
     } catch (error: any) {
-      console.error("Error fetching schedule data:", error);
+      console.log("Error fetching schedule data:", error);
       setAlertContent({
         variant: "error",
         message: error?.response?.data?.detail || "Something went wrong!",
@@ -203,7 +203,7 @@ const OperatorDashboard: React.FC = () => {
       //     : { date: "", day: "", rooms: [], operators: [] }
       // );
     } catch (error: any) {
-      console.error("Error fetching schedule data:", error);
+      console.log("Error fetching schedule data:", error);
       setAlertContent({
         variant: "error",
         message: error?.response?.data?.detail || "Something went wrong!",

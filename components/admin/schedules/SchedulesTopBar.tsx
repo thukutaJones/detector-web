@@ -52,7 +52,7 @@ const SchedulesTopBar = ({
         fileInputRef.current.value = "";
       }
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.log("Error uploading file:", error);
     } finally {
       setUploading(false);
       setUploadProgress(0);

@@ -257,7 +257,7 @@ const Templates = async (analytics: any, allAlerts: any, type: any): Promise<str
         throw new Error(`Template type "${type}" is not supported.`);
     }
   } catch (error: any) {
-    console.error("Error generating template:", error);
+    console.log("Error generating template:", error);
     throw error;
   }
 };

@@ -299,7 +299,7 @@ const DetectorAnalytics: React.FC = () => {
         setUsers(usersRes?.data?.users || []);
         setAlerts(alertsRes.data?.alerts || []);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
       } finally {
         setLoading(false);
       }

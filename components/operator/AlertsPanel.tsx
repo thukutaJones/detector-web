@@ -120,7 +120,7 @@ const AlertsPanel: React.FC<AlertsPanelProps> = ({
         setTimeout(() => setNudgeSuccess(false), 2000);
       }, 500);
     } catch (error) {
-      console.error("Failed to send nudge:", error);
+      console.log("Failed to send nudge:", error);
       setNudgeLoading(false);
     }
   };
